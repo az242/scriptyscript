@@ -17,63 +17,64 @@ public class runner {
 	static //600 heal minimun 
 	int[][] screen = {{-1500,0},{-1500,500}};
 	static int currScreen = 0;
-	static boolean facingRight = false;
 	static ArrayList<Integer> movesDone = new ArrayList<Integer>();
 	public static void main(String args[]) {
 		try {
 			robot = new Robot();
-//			swapScreens(0);
-			click(675,390);
-			click(800, 450);
-			int distanceFromStart = 0;
+			swapScreens(0);
+			int distanceFromStart = getCurrPosition(600,390,200,60,"guildIcon.png");
 			int maxDistance = 140;
 			int minHoldTime = 80;
 			int maxHoldTime = 120;
 			int healDelay = 615;
-//			for(int x=0;x<100;x++) {
-//				System.out.println("<--------------->");
-//				System.out.println("iteration " + x);
-//				System.out.println("<--------------->");
-//				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
-//				robot.delay(750);
-////				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
-////				if(x%9 == 0 && x!=0) {
-////					feedPet(0, KeyEvent.VK_PAGE_UP);
-//////					feedPet(1, KeyEvent.VK_PAGE_DOWN);
-////				}
-////				if(x%6 == 0 && x!=0) {
-////					System.out.println("Picking up loot on screen 1");
-////					swapScreens(1);
-////					pickUp(randomNum(10,20));
-////					swapScreens(0);
-////				}
-//				System.out.print("Current Move List: ");
-//				for(int y=0;y<movesDone.size();y++) {
-//					System.out.print(movesDone.get(y)+",");
-//				}
-//				System.out.println();
-//			}
-			BufferedImage imageRecog = ImageIO.read(new File("testFace.png"));
-			BufferedImage image = robot.createScreenCapture(new Rectangle(600,390,200,60));
-			for(int x=0;x<image.getWidth()-imageRecog.getWidth();x++) {
-				for(int y=0;y<image.getHeight()-imageRecog.getHeight();y++) {
-					boolean matches = true;
-					for(int x2=0;x2<imageRecog.getWidth();x2++) {
-						for(int y2=0;y2<imageRecog.getHeight();y2++) {
-							if(imageRecog.getRGB(x2, y2) != image.getRGB(x+x2, y+y2)) {
-								matches = false;
-							}
-						}
-					}
-					if(matches) {
-						System.out.println(x);
-					}
+			
+			for(int x=0;x<100;x++) {
+				System.out.println("<--------------->");
+				System.out.println("iteration " + x);
+				System.out.println("<--------------->");
+				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
+				robot.delay(750);
+				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
+				if(x%9 == 0 && x!=0) {
+					feedPet(0, KeyEvent.VK_PAGE_UP);
+//					feedPet(1, KeyEvent.VK_PAGE_DOWN);
 				}
+				if(x%6 == 0 && x!=0) {
+					System.out.println("Picking up loot on screen 1");
+					swapScreens(1);
+					pickUp(randomNum(10,20));
+					swapScreens(0);
+				}
+				System.out.print("Current Move List: ");
+				for(int y=0;y<movesDone.size();y++) {
+					System.out.print(movesDone.get(y)+",");
+				}
+				System.out.println();
 			}
 		} catch (AWTException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	public static int getCurrPosition(int x, int y, int width, int height, String fileName) throws IOException {
+		BufferedImage imageRecog = ImageIO.read(new File(fileName));
+		BufferedImage image = robot.createScreenCapture(new Rectangle(x,y,width,height));
+		for(int x1=0;x<image.getWidth()-imageRecog.getWidth();x1++) {
+			for(int y1=0;y<image.getHeight()-imageRecog.getHeight();y1++) {
+				boolean matches = true;
+				for(int x2=0;x2<imageRecog.getWidth();x2++) {
+					for(int y2=0;y2<imageRecog.getHeight();y2++) {
+						if(imageRecog.getRGB(x2, y2) != image.getRGB(x1+x2, y1+y2)) {
+							matches = false;
+						}
+					}
+				}
+				if(matches) {
+					return x1;
+				}
+			}
+		}
+		return -1;
 	}
 	public static void swapScreens(int screenId) {
 		click(screen[screenId][0],screen[screenId][1]);
