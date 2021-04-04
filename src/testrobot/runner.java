@@ -4,6 +4,7 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 public class runner {
 	static Robot robot;
@@ -11,36 +12,39 @@ public class runner {
 	int[][] screen = {{-1500,0},{-1500,500}};
 	static int currScreen = 0;
 	static boolean facingRight = false;
+	static ArrayList<Integer> movesDone = new ArrayList<Integer>();
 	public static void main(String args[]) {
 		try {
 			robot = new Robot();
 			swapScreens(0);
 			int distanceFromStart = 0;
-			int maxDistance = 150;
+			int maxDistance = 140;
 			int minHoldTime = 80;
-			int maxHoldTime = 100;
+			int maxHoldTime = 120;
 			int healDelay = 615;
+			
 			for(int x=0;x<100;x++) {
 				System.out.println("<--------------->");
 				System.out.println("iteration " + x);
 				System.out.println("<--------------->");
 				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
-				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
-				if(x%9 == 0 && x!=0) {
-					System.out.println("Feeding pet on Screen 0");
-					keyPress(KeyEvent.VK_PAGE_UP);
-//					swapScreens(1);
-//					System.out.println("Feeding pet on Screen 1");
-//					keyPress(KeyEvent.VK_PAGE_DOWN);
-//					robot.delay(100);
-//					swapScreens(0);
-				}
+				robot.delay(750);
+//				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
+//				if(x%9 == 0 && x!=0) {
+//					feedPet(0, KeyEvent.VK_PAGE_UP);
+////					feedPet(1, KeyEvent.VK_PAGE_DOWN);
+//				}
 //				if(x%6 == 0 && x!=0) {
 //					System.out.println("Picking up loot on screen 1");
 //					swapScreens(1);
 //					pickUp(randomNum(10,20));
 //					swapScreens(0);
 //				}
+				System.out.print("Current Move List: ");
+				for(int y=0;y<movesDone.size();y++) {
+					System.out.print(movesDone.get(y)+",");
+				}
+				System.out.println();
 			}
 		} catch (AWTException e) {
 			// TODO Auto-generated catch block
@@ -62,7 +66,28 @@ public class runner {
 	public static int moveRandomly(int maxDistance, int distanceFromStart, int minHoldTime, int maxHoldTime) {
 		int newRandomDelay = minHoldTime;
 		double leftRight = 0;
+		int newDistance;
 		int predictedPosition = maxDistance + 1;
+		if(movesDone.size() > 1) {
+			if(Math.random() > .2) {
+				int randomMove = randomNum(0, movesDone.size());
+				while(Math.abs(predictedPosition) > maxDistance) {
+					randomMove = randomNum(0, movesDone.size());
+					predictedPosition = distanceFromStart;
+					predictedPosition += movesDone.get(randomMove)*-1;
+				}
+				if(movesDone.get(randomMove) > 0) {
+					moveLeft(movesDone.get(randomMove));
+					newDistance = distanceFromStart - movesDone.get(randomMove);
+				} else {
+					moveRight(movesDone.get(randomMove)*-1);
+					newDistance = distanceFromStart + (movesDone.get(randomMove)*-1);
+				}
+				System.out.println("Using old move "+movesDone.get(randomMove)+" to move from " + distanceFromStart + " to " + newDistance );
+				movesDone.remove(randomMove);
+				return newDistance;
+			}
+		}
 		while(Math.abs(predictedPosition) > maxDistance) {
 			predictedPosition = distanceFromStart;
 			newRandomDelay = randomNum(minHoldTime,maxHoldTime);
@@ -73,17 +98,18 @@ public class runner {
 				predictedPosition += newRandomDelay;
 			}
 		}
-		int newDistance;
 		if(leftRight < .5) {
 			moveLeft(newRandomDelay);
+			movesDone.add(newRandomDelay*-1);
 			robot.delay(randomNum(500,1000));
 			newDistance = distanceFromStart -newRandomDelay;
 		} else {
 			moveRight(newRandomDelay);
+			movesDone.add(newRandomDelay);
 			robot.delay(randomNum(500,1000));
 			newDistance= distanceFromStart +newRandomDelay;
 		}
-		System.out.println("Resetting position from " + distanceFromStart + " to " + newDistance );
+		System.out.println("Resetting position with " +newRandomDelay +" from " + distanceFromStart + " to " + newDistance );
 		return newDistance;
 	}
 	public static void attack(int numAttacks, int key, int attackDelay) {
@@ -93,6 +119,21 @@ public class runner {
 			robot.delay(attackDelay + randomPosNeg(randomNum(1,10)));
 		}
 		robot.keyRelease(key);
+	}
+	public static void feedPet(int screen, int key) {
+		int temp = currScreen;
+		System.out.println("Feeding pet on Screen " + screen);
+		if(screen != currScreen) {
+			swapScreens(screen);
+			robot.delay(100);
+			keyPress(key);
+			robot.delay(100);
+			swapScreens(temp);
+			robot.delay(100);
+		} else {
+			keyPress(key);
+			robot.delay(100);
+		}
 	}
 	public static int randomPosNeg(int input) {
 		double random = Math.random();
