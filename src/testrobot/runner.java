@@ -1,10 +1,16 @@
 package testrobot;
 
 import java.awt.AWTException;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class runner {
 	static Robot robot;
@@ -16,37 +22,55 @@ public class runner {
 	public static void main(String args[]) {
 		try {
 			robot = new Robot();
-			swapScreens(0);
+//			swapScreens(0);
+			click(675,390);
+			click(800, 450);
 			int distanceFromStart = 0;
 			int maxDistance = 140;
 			int minHoldTime = 80;
 			int maxHoldTime = 120;
 			int healDelay = 615;
-			
-			for(int x=0;x<100;x++) {
-				System.out.println("<--------------->");
-				System.out.println("iteration " + x);
-				System.out.println("<--------------->");
-				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
-				robot.delay(750);
-//				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
-//				if(x%9 == 0 && x!=0) {
-//					feedPet(0, KeyEvent.VK_PAGE_UP);
-////					feedPet(1, KeyEvent.VK_PAGE_DOWN);
+//			for(int x=0;x<100;x++) {
+//				System.out.println("<--------------->");
+//				System.out.println("iteration " + x);
+//				System.out.println("<--------------->");
+//				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
+//				robot.delay(750);
+////				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
+////				if(x%9 == 0 && x!=0) {
+////					feedPet(0, KeyEvent.VK_PAGE_UP);
+//////					feedPet(1, KeyEvent.VK_PAGE_DOWN);
+////				}
+////				if(x%6 == 0 && x!=0) {
+////					System.out.println("Picking up loot on screen 1");
+////					swapScreens(1);
+////					pickUp(randomNum(10,20));
+////					swapScreens(0);
+////				}
+//				System.out.print("Current Move List: ");
+//				for(int y=0;y<movesDone.size();y++) {
+//					System.out.print(movesDone.get(y)+",");
 //				}
-//				if(x%6 == 0 && x!=0) {
-//					System.out.println("Picking up loot on screen 1");
-//					swapScreens(1);
-//					pickUp(randomNum(10,20));
-//					swapScreens(0);
-//				}
-				System.out.print("Current Move List: ");
-				for(int y=0;y<movesDone.size();y++) {
-					System.out.print(movesDone.get(y)+",");
+//				System.out.println();
+//			}
+			BufferedImage imageRecog = ImageIO.read(new File("testFace.png"));
+			BufferedImage image = robot.createScreenCapture(new Rectangle(600,390,200,60));
+			for(int x=0;x<image.getWidth()-imageRecog.getWidth();x++) {
+				for(int y=0;y<image.getHeight()-imageRecog.getHeight();y++) {
+					boolean matches = true;
+					for(int x2=0;x2<imageRecog.getWidth();x2++) {
+						for(int y2=0;y2<imageRecog.getHeight();y2++) {
+							if(imageRecog.getRGB(x2, y2) != image.getRGB(x+x2, y+y2)) {
+								matches = false;
+							}
+						}
+					}
+					if(matches) {
+						System.out.println(x);
+					}
 				}
-				System.out.println();
 			}
-		} catch (AWTException e) {
+		} catch (AWTException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
