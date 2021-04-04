@@ -18,20 +18,22 @@ public class runner {
 	int[][] screen = {{100,100},{-1500,500}};
 	static int currScreen = 0;
 	static Rectangle gs2 = new Rectangle(100,475,700,75);
+	static long buffTimer = System.currentTimeMillis();
+	static int[] buffKeys = {KeyEvent.VK_U};
 	public static void main(String args[]) {
 		try {
-			int healDelay = 615;
 			int leftBound = 235;
 			int rightBound = 310;
 			robot = new Robot();
 			swapScreens(0);
+			rebuff(buffKeys);
 			System.out.println("Starting at position: " + getCurrPosition(gs2,"guildvert.png") + " with bounds: " + leftBound + ", " + rightBound);
 			for(int x=0;x<100;x++) {
 				System.out.println("<--------------->");
-				System.out.println("iteration " + x);
+				System.out.println("iteration " + x + " with bounds: " + leftBound + ", " + rightBound);
 				System.out.println("<--------------->");
 				randomMove(leftBound,rightBound, "guildvert.png");
-				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
+				attack(100 - randomNum(1,40), KeyEvent.VK_V, -1);
 				if(x%9 == 0 && x!=0) {
 					feedPet(0, KeyEvent.VK_PAGE_UP);
 //					feedPet(1, KeyEvent.VK_PAGE_DOWN);
@@ -118,13 +120,26 @@ public class runner {
 		System.out.println("Moving from "+currPosition+" to " + newPosition);
 		robot.delay(randomNum(500,1000));
 	}
-	public static void attack(int numAttacks, int key, int attackDelay) {
+	public static void attack(int numAttacks, int key, int buffLength) {
+		int attackDelay = 615;
 		System.out.println("Attacking " + numAttacks + " times with " + attackDelay + "ms Delay.");
 		for(int x=0;x<numAttacks;x++) {
+			long temptime = System.currentTimeMillis();
+			if(buffLength > 0 && temptime >= buffTimer + buffLength*1000) {
+				x +=rebuff(buffKeys);
+			}
 			robot.keyPress(key);
 			robot.delay(attackDelay + randomPosNeg(randomNum(1,10)));
 		}
 		robot.keyRelease(key);
+	}
+	public static int rebuff(int[] keys) {
+		buffTimer = System.currentTimeMillis();
+		for(int x=0;x<keys.length;x++) {
+			keyPress(keys[x]);
+			robot.delay(1000);
+		}
+		return keys.length;
 	}
 	public static void feedPet(int screen, int key) {
 		int temp = currScreen;
