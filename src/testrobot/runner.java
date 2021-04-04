@@ -15,52 +15,41 @@ import javax.imageio.ImageIO;
 public class runner {
 	static Robot robot;
 	static //600 heal minimun 
-	int[][] screen = {{-1500,0},{-1500,500}};
+	int[][] screen = {{100,100},{-1500,500}};
 	static int currScreen = 0;
-	static ArrayList<Integer> movesDone = new ArrayList<Integer>();
+	static Rectangle gs2 = new Rectangle(100,475,700,75);
 	public static void main(String args[]) {
 		try {
+			int healDelay = 615;
+			int leftBound = 235;
+			int rightBound = 310;
 			robot = new Robot();
 			swapScreens(0);
-			int distanceFromStart = getCurrPosition(600,390,200,60,"guildIcon.png");
-			int maxDistance = 140;
-			int minHoldTime = 80;
-			int maxHoldTime = 120;
-			int healDelay = 615;
-			
+			System.out.println("Starting at position: " + getCurrPosition(gs2,"guildvert.png") + " with bounds: " + leftBound + ", " + rightBound);
 			for(int x=0;x<100;x++) {
 				System.out.println("<--------------->");
 				System.out.println("iteration " + x);
 				System.out.println("<--------------->");
-				distanceFromStart = moveRandomly(maxDistance,distanceFromStart,minHoldTime,maxHoldTime);
-				robot.delay(750);
+				randomMove(leftBound,rightBound, "guildvert.png");
 				attack(100 - randomNum(1,40), KeyEvent.VK_V, healDelay);
 				if(x%9 == 0 && x!=0) {
 					feedPet(0, KeyEvent.VK_PAGE_UP);
 //					feedPet(1, KeyEvent.VK_PAGE_DOWN);
 				}
 				if(x%6 == 0 && x!=0) {
-					System.out.println("Picking up loot on screen 1");
-					swapScreens(1);
-					pickUp(randomNum(10,20));
-					swapScreens(0);
+					pickUp(0,randomNum(10,20));
 				}
-				System.out.print("Current Move List: ");
-				for(int y=0;y<movesDone.size();y++) {
-					System.out.print(movesDone.get(y)+",");
-				}
-				System.out.println();
 			}
 		} catch (AWTException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	public static int getCurrPosition(int x, int y, int width, int height, String fileName) throws IOException {
+	public static int getCurrPosition(Rectangle rect, String fileName) throws IOException {
 		BufferedImage imageRecog = ImageIO.read(new File(fileName));
-		BufferedImage image = robot.createScreenCapture(new Rectangle(x,y,width,height));
-		for(int x1=0;x<image.getWidth()-imageRecog.getWidth();x1++) {
-			for(int y1=0;y<image.getHeight()-imageRecog.getHeight();y1++) {
+		BufferedImage image = robot.createScreenCapture(rect);
+		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth();x1++) {
+			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight();y1++) {
 				boolean matches = true;
 				for(int x2=0;x2<imageRecog.getWidth();x2++) {
 					for(int y2=0;y2<imageRecog.getHeight();y2++) {
@@ -80,62 +69,54 @@ public class runner {
 		click(screen[screenId][0],screen[screenId][1]);
 		robot.delay(100);
 	}
-	public static void pickUp(int amount) {
-		for(int x=0;x<amount;x++) {
-			robot.keyPress(KeyEvent.VK_Z);
-			robot.delay(randomNum(75,200));
-		}
-		robot.keyRelease(KeyEvent.VK_Z);
-		robot.delay(100);
-	}
-	public static int moveRandomly(int maxDistance, int distanceFromStart, int minHoldTime, int maxHoldTime) {
-		int newRandomDelay = minHoldTime;
-		double leftRight = 0;
-		int newDistance;
-		int predictedPosition = maxDistance + 1;
-		if(movesDone.size() > 1) {
-			if(Math.random() > .2) {
-				int randomMove = randomNum(0, movesDone.size());
-				while(Math.abs(predictedPosition) > maxDistance) {
-					randomMove = randomNum(0, movesDone.size());
-					predictedPosition = distanceFromStart;
-					predictedPosition += movesDone.get(randomMove)*-1;
-				}
-				if(movesDone.get(randomMove) > 0) {
-					moveLeft(movesDone.get(randomMove));
-					newDistance = distanceFromStart - movesDone.get(randomMove);
-				} else {
-					moveRight(movesDone.get(randomMove)*-1);
-					newDistance = distanceFromStart + (movesDone.get(randomMove)*-1);
-				}
-				System.out.println("Using old move "+movesDone.get(randomMove)+" to move from " + distanceFromStart + " to " + newDistance );
-				movesDone.remove(randomMove);
-				return newDistance;
+	public static void pickUp(int screen, int amount) {
+		int temp = currScreen;
+		System.out.println("Picking up loot on screen " + screen + amount + " times.");
+		if(screen != currScreen) {
+			swapScreens(screen);
+			robot.delay(100);
+			for(int x=0;x<amount;x++) {
+				robot.keyPress(KeyEvent.VK_Z);
+				robot.delay(randomNum(75,200));
 			}
-		}
-		while(Math.abs(predictedPosition) > maxDistance) {
-			predictedPosition = distanceFromStart;
-			newRandomDelay = randomNum(minHoldTime,maxHoldTime);
-			leftRight = Math.random();
-			if(leftRight < .5) { //left
-				predictedPosition -= newRandomDelay;
-			} else { //right
-				predictedPosition += newRandomDelay;
-			}
-		}
-		if(leftRight < .5) {
-			moveLeft(newRandomDelay);
-			movesDone.add(newRandomDelay*-1);
-			robot.delay(randomNum(500,1000));
-			newDistance = distanceFromStart -newRandomDelay;
+			robot.keyRelease(KeyEvent.VK_Z);
+			robot.delay(100);
+			swapScreens(temp);
+			robot.delay(100);
 		} else {
-			moveRight(newRandomDelay);
-			movesDone.add(newRandomDelay);
-			robot.delay(randomNum(500,1000));
-			newDistance= distanceFromStart +newRandomDelay;
+			for(int x=0;x<amount;x++) {
+				robot.keyPress(KeyEvent.VK_Z);
+				robot.delay(randomNum(75,200));
+			}
+			robot.keyRelease(KeyEvent.VK_Z);
+			robot.delay(100);
 		}
-		System.out.println("Resetting position with " +newRandomDelay +" from " + distanceFromStart + " to " + newDistance );
-		return newDistance;
+	}
+	public static void randomMove(int leftBound, int rightBound, String imageRecog) throws IOException {
+		int minHoldTime = 80;
+		int maxHoldTime = 120;
+		int currPosition = getCurrPosition(gs2,imageRecog);
+		if(currPosition == -1) {
+			System.out.println("Couldn't find character! image recog blocked! Exiting...");
+			System.exit(0);
+		}
+		int randomDelay = randomNum(minHoldTime,maxHoldTime);
+		if(currPosition-leftBound < 23) {
+			//move right
+			moveRight(randomDelay);
+		} else if(rightBound-currPosition < 23) {
+			//move left
+			moveLeft(randomDelay);
+		} else {
+			if(Math.random() > .5) {
+				moveRight(randomDelay);
+			} else {
+				moveLeft(randomDelay);
+			}
+		}
+		int newPosition = getCurrPosition(gs2,imageRecog);
+		System.out.println("Moving from "+currPosition+" to " + newPosition);
+		robot.delay(randomNum(500,1000));
 	}
 	public static void attack(int numAttacks, int key, int attackDelay) {
 		System.out.println("Attacking " + numAttacks + " times with " + attackDelay + "ms Delay.");
