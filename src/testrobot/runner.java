@@ -98,6 +98,13 @@ public class runner {
 		int minHoldTime = 80;
 		int maxHoldTime = 120;
 		int currPosition = getCurrPosition(gs2,imageRecog);
+		int retries = 0;
+		while(currPosition < 0 && retries < 3) {
+			retries++;
+			System.out.println("Couldn't find character! image recog blocked! Retrying after 5 seconds...");
+			robot.delay(5000);
+			currPosition = getCurrPosition(gs2,imageRecog);
+		}
 		if(currPosition == -1) {
 			System.out.println("Couldn't find character! image recog blocked! Exiting...");
 			System.exit(0);
