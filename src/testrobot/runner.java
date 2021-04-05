@@ -18,7 +18,7 @@ public class runner {
 	int[][] screen = {{100,100},{-1500,500}};
 	static int currScreen = 0;
 	static Rectangle gs2 = new Rectangle(100,475,700,75);
-	static long buffTimer = System.currentTimeMillis();
+	static long buffTimer = 0;
 	static int[] buffKeys = {KeyEvent.VK_U};
 	public static void main(String args[]) {
 		try {
@@ -33,7 +33,7 @@ public class runner {
 				System.out.println("iteration " + x + " with bounds: " + leftBound + ", " + rightBound);
 				System.out.println("<--------------->");
 				randomMove(leftBound,rightBound, "guildvert.png");
-				attack(100 - randomNum(1,40), KeyEvent.VK_V, -1);
+				attack(100 - randomNum(1,40), KeyEvent.VK_V, 50);
 				if(x%9 == 0 && x!=0) {
 					feedPet(0, KeyEvent.VK_PAGE_UP);
 //					feedPet(1, KeyEvent.VK_PAGE_DOWN);
@@ -117,8 +117,13 @@ public class runner {
 			}
 		}
 		int newPosition = getCurrPosition(gs2,imageRecog);
-		System.out.println("Moving from "+currPosition+" to " + newPosition);
-		robot.delay(randomNum(500,1000));
+		if(newPosition == currPosition) {
+			System.out.println("Failed to move... trying again!");
+			randomMove(leftBound, rightBound, imageRecog);
+		} else {
+			System.out.println("Moving from "+currPosition+" to " + newPosition);
+			robot.delay(randomNum(500,1500));
+		}
 	}
 	public static void attack(int numAttacks, int key, int buffLength) {
 		int attackDelay = 615;
@@ -135,9 +140,10 @@ public class runner {
 	}
 	public static int rebuff(int[] keys) {
 		buffTimer = System.currentTimeMillis();
+		System.out.println("Rebuffing...");
 		for(int x=0;x<keys.length;x++) {
 			keyPress(keys[x]);
-			robot.delay(1000);
+			robot.delay(randomNum(1000,1500));
 		}
 		return keys.length;
 	}
