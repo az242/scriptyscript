@@ -11,40 +11,55 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
-
+class ScriptArea {
+	Rectangle searchArea;
+	int leftBound;
+	int rightBound;
+	public ScriptArea(Rectangle searchArea, int leftBound, int rightBound) {
+		this.searchArea = searchArea;
+		this.leftBound = leftBound;
+		this.rightBound = rightBound;
+	}
+}
 public class runner {
 	static Robot robot;
 	static //600 heal minimun 
-	int[][] screen = {{100,100},{-1500,500}};
+	int[][] screen = {{100,100},{100,1000}};
 	static int currScreen = 0;
+	static Rectangle gs1 = new Rectangle(300,475,700,75);
 	static Rectangle gs2 = new Rectangle(100,475,700,75);
+	static ScriptArea[] scripts = {new ScriptArea(gs1,495,575), new ScriptArea(gs2,235,310)};
 	static long buffTimer = 0;
 	static int[] buffKeys = {KeyEvent.VK_U};
 	public static void main(String args[]) {
 		try {
-			int leftBound = 235;
-			int rightBound = 310;
 			robot = new Robot();
-			swapScreens(0);
-			rebuff(buffKeys);
-			System.out.println("Starting at position: " + getCurrPosition(gs2,"guildvert.png") + " with bounds: " + leftBound + ", " + rightBound);
-			for(int x=0;x<100;x++) {
-				System.out.println("<--------------->");
-				System.out.println("iteration " + x + " with bounds: " + leftBound + ", " + rightBound);
-				System.out.println("<--------------->");
-				randomMove(leftBound,rightBound, "guildvert.png");
-				attack(100 - randomNum(1,40), KeyEvent.VK_V, 50);
-				if(x%9 == 0 && x!=0) {
-					feedPet(0, KeyEvent.VK_PAGE_UP);
-//					feedPet(1, KeyEvent.VK_PAGE_DOWN);
-				}
-				if(x%6 == 0 && x!=0) {
-					pickUp(0,randomNum(10,20));
-				}
-			}
+			mainFlow(scripts[1]);
 		} catch (AWTException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public static void mainFlow(ScriptArea params) throws IOException {
+		swapScreens(0);
+		System.out.println("Starting at position: " + getCurrPosition(params.searchArea,"guildvert.png") + " with bounds: " + params.leftBound + ", " + params.rightBound);
+		rebuff(buffKeys);
+		for(int x=0;x<100;x++) {
+			System.out.println("<--------------->");
+			System.out.println("iteration " + x + " with bounds: " + params.leftBound + ", " + params.rightBound);
+			System.out.println("<--------------->");
+			randomMove(params.leftBound,params.rightBound, "guildvert.png", params.searchArea);
+			attack(100 - randomNum(1,40), KeyEvent.VK_V, 120);
+			if(x%9 == 0 && x!=0) {
+				feedPet(0, KeyEvent.VK_PAGE_UP);
+//				feedPet(1, KeyEvent.VK_PAGE_DOWN);
+			}
+			if(x%6 == 0 && x!=0) {
+				pickUp(0,randomNum(10,20));
+				robot.delay(500);
+//				pickUp(1,randomNum(10,20));
+			}
 		}
 	}
 	public static int getCurrPosition(Rectangle rect, String fileName) throws IOException {
@@ -69,11 +84,11 @@ public class runner {
 	}
 	public static void swapScreens(int screenId) {
 		click(screen[screenId][0],screen[screenId][1]);
-		robot.delay(100);
+		robot.delay(200);
 	}
 	public static void pickUp(int screen, int amount) {
 		int temp = currScreen;
-		System.out.println("Picking up loot on screen " + screen + amount + " times.");
+		System.out.println("Picking up loot on screen " + screen + " " + amount + " times.");
 		if(screen != currScreen) {
 			swapScreens(screen);
 			robot.delay(100);
@@ -94,16 +109,16 @@ public class runner {
 			robot.delay(100);
 		}
 	}
-	public static void randomMove(int leftBound, int rightBound, String imageRecog) throws IOException {
+	public static void randomMove(int leftBound, int rightBound, String imageRecog, Rectangle area) throws IOException {
 		int minHoldTime = 80;
 		int maxHoldTime = 120;
-		int currPosition = getCurrPosition(gs2,imageRecog);
+		int currPosition = getCurrPosition(area,imageRecog);
 		int retries = 0;
 		while(currPosition < 0 && retries < 3) {
 			retries++;
 			System.out.println("Couldn't find character! image recog blocked! Retrying after 5 seconds...");
 			robot.delay(5000);
-			currPosition = getCurrPosition(gs2,imageRecog);
+			currPosition = getCurrPosition(area,imageRecog);
 		}
 		if(currPosition == -1) {
 			System.out.println("Couldn't find character! image recog blocked! Exiting...");
@@ -123,10 +138,10 @@ public class runner {
 				moveLeft(randomDelay);
 			}
 		}
-		int newPosition = getCurrPosition(gs2,imageRecog);
+		int newPosition = getCurrPosition(area,imageRecog);
 		if(newPosition == currPosition) {
 			System.out.println("Failed to move... trying again!");
-			randomMove(leftBound, rightBound, imageRecog);
+			randomMove(leftBound, rightBound, imageRecog, area);
 		} else {
 			System.out.println("Moving from "+currPosition+" to " + newPosition);
 			robot.delay(randomNum(500,1500));
@@ -134,6 +149,7 @@ public class runner {
 	}
 	public static void attack(int numAttacks, int key, int buffLength) {
 		int attackDelay = 615;
+//		int attackDelay = 1000;
 		System.out.println("Attacking " + numAttacks + " times with " + attackDelay + "ms Delay.");
 		for(int x=0;x<numAttacks;x++) {
 			long temptime = System.currentTimeMillis();
@@ -150,7 +166,7 @@ public class runner {
 		System.out.println("Rebuffing...");
 		for(int x=0;x<keys.length;x++) {
 			keyPress(keys[x]);
-			robot.delay(randomNum(1000,1500));
+			robot.delay(randomNum(1500,2500));
 		}
 		return keys.length;
 	}
