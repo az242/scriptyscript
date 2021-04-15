@@ -14,7 +14,8 @@ public class Bot extends BaseBot{
 	Rectangle gs2AFK = new Rectangle(300,425,150,75);
 	MinimapData ulu2 = new MinimapData("ulu2Test",new Rectangle(6,72,145,81), new Rectangle(47,45,70,15),"ulu2Mapname.png");
 	MinimapData gs2Dungeon = new MinimapData("Gs2 Dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"gs2dungeon.png");
-	MinimapData gs2 = new MinimapData("Gs2", new Rectangle(6,72,121,53), new Rectangle(47,45,75,15),"gs2mapName.png");
+	MinimapData gs2 = new MinimapData("gs2", new Rectangle(6,72,121,53), new Rectangle(47,45,75,15),"gs2mapName.png");
+	MinimapData gs1 = new MinimapData("gs1", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"gs1mapName.png");
 	Rectangle chat = new Rectangle(525,700, 35, 30);
 	ArrayList<Rectangle> areas = new ArrayList<Rectangle>();
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
@@ -25,7 +26,7 @@ public class Bot extends BaseBot{
 			new BuffData("Invincible", 300, KeyEvent.VK_T),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R)};
 	long[] buffTimers = new long[buffs.length];
-	
+	long hsTimer = 0;
 	
 	public Bot(Robot robot) {
 		super(robot);
@@ -35,6 +36,7 @@ public class Bot extends BaseBot{
 		minimapDatas.add(ulu2);
 		minimapDatas.add(gs2Dungeon);
 		minimapDatas.add(gs2);
+		minimapDatas.add(gs1);
 		adjustRectangle(mapleScreen,areas);
 		adjustMinimapData(mapleScreen,minimapDatas);
 	}
@@ -55,7 +57,7 @@ public class Bot extends BaseBot{
 		botOutput("Starting at position: " + cords[0] + ", " + cords[1]);
 //		rebuff2();
 		int positionIndex = 0;
-		for(int x=0;x<1000;x++) {
+		for(int x=0;x<2000;x++) {
 			System.out.println("<--------------->");
 			System.out.println("iteration " + x);
 			System.out.println("<--------------->");
@@ -66,6 +68,145 @@ public class Bot extends BaseBot{
 //				feedPet(1, KeyEvent.VK_PAGE_DOWN);
 			}
 		}
+		exitScript();
+	}
+	public int GS1_1Movement(int positionIndex, MinimapData map) throws IOException {
+//		Zone stairsZone = new Zone(new int[]{37,34},new int[]{41,46},true);
+		Zone dropdownZone = new Zone(new int[]{35,20},new int[]{45,28}); //dropdown
+		Zone teleUpZone = new Zone(new int[]{96,36},new int[]{103,42}); //teleup
+		
+		Zone droppedZone = new Zone(new int[]{35,36},new int[]{45,42}); //dropdown
+		Zone teledZone = new Zone(new int[]{10,20},new int[]{41,28}); //teleup
+		int[] startCoords = getMinimapPosition(map);
+		if(dropdownZone.isInYZone(startCoords[1])) {
+			if(dropdownZone.isInZone(startCoords[0],startCoords[1])){
+				int[] currentCoords = getMinimapPosition(map);
+				int retries = 0;
+				while(!droppedZone.isInYZone(currentCoords[1]) && retries < 5){
+					botOutput("Trying to drop down...");
+					waitOnChat();
+					moveToZoneX(dropdownZone,map);
+					jumpDown();
+					currentCoords = getMinimapPosition(map);
+					retries++;
+				}
+				if(retries == 5) {
+					botOutput("Failed to drop. Exiting...");
+					exitScript();
+				} else {
+					botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+				}
+				return ++positionIndex;
+			}else{
+				moveToZoneX(dropdownZone,map);
+			}
+		}else if(teleUpZone.isInYZone(startCoords[1])){
+			if((teleUpZone.isInZone(startCoords[0],startCoords[1]) || startCoords[0] > teleUpZone.getRightBound()) && positionIndex == 1){
+				int[] currentCoords = getMinimapPosition(map);
+				int retries = 0;
+				while(!teledZone.isInYZone(currentCoords[1]) && retries < 5){
+					botOutput("Trying to tele up...");
+					waitOnChat();
+					moveToZoneX(teleUpZone,map);
+					teleportUp();
+					long currTime = System.currentTimeMillis();
+					if(currTime > hsTimer + 102*1000) {
+						botOutput("HSing party...");
+						keyPress(KeyEvent.VK_U);
+						hsTimer = currTime;
+						robot.delay(1750);
+					}
+					teleportUp();
+					currentCoords = getMinimapPosition(map);
+					retries++;
+				}
+				if(retries == 5) {
+					botOutput("Failed to teleport up. Exiting...");
+					exitScript();
+				} else {
+					botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+				}
+				return 0;
+			} else {
+				moveToZoneX(teleUpZone,map);
+			}
+		} else{
+			botOutput("Something went wrong during movement. ");
+			exitScript();
+		}
+		int[] currentCoords = getMinimapPosition(map);
+		botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+		return positionIndex;
+	}
+	public int GS1Movement(int positionIndex, MinimapData map) throws IOException {
+//		Zone stairsZone = new Zone(new int[]{37,34},new int[]{41,46},true);
+		Zone dropdownZone = new Zone(new int[]{5,20},new int[]{35,28}); //dropdown
+		Zone teleUpZone = new Zone(new int[]{96,36},new int[]{102,42}); //teleup
+		
+		Zone droppedZone = new Zone(new int[]{90,36},new int[]{120,42}); //dropdown
+		Zone teledZone = new Zone(new int[]{98,20},new int[]{102,28}); //teleup
+		int[] startCoords = getMinimapPosition(map);
+		if(dropdownZone.isInYZone(startCoords[1])) {
+			if(dropdownZone.isInZone(startCoords[0],startCoords[1])){
+				int[] currentCoords = getMinimapPosition(map);
+				int retries = 0;
+				while(!droppedZone.isInYZone(currentCoords[1]) && retries < 5){
+					botOutput("Trying to drop down...");
+					waitOnChat();
+					moveToZoneX(dropdownZone,map);
+					jumpDown();
+					currentCoords = getMinimapPosition(map);
+					retries++;
+				}
+				if(retries == 5) {
+					botOutput("Failed to drop. Exiting...");
+					exitScript();
+				} else {
+					botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+				}
+				return ++positionIndex;
+			}else{
+				teleportLeft();
+				teleportLeft();
+			}
+		}else if(teleUpZone.isInYZone(startCoords[1])){
+			if((teleUpZone.isInZone(startCoords[0],startCoords[1]) || startCoords[0] > teleUpZone.getRightBound()) && positionIndex == 1){
+				int[] currentCoords = getMinimapPosition(map);
+				int retries = 0;
+				while(!teledZone.isInYZone(currentCoords[1]) && retries < 5){
+					botOutput("Trying to tele up...");
+					waitOnChat();
+					moveToZoneX(teleUpZone,map);
+					teleportUp();
+					long currTime = System.currentTimeMillis();
+					if(currTime > hsTimer + 102*1000) {
+						botOutput("HSing party...");
+						keyPress(KeyEvent.VK_U);
+						hsTimer = currTime;
+						robot.delay(1750);
+					}
+					teleportUp();
+					currentCoords = getMinimapPosition(map);
+					retries++;
+				}
+				if(retries == 5) {
+					botOutput("Failed to teleport up. Exiting...");
+					exitScript();
+				} else {
+					botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+				}
+				return 0;
+			} else {
+				teleportRight();
+				teleportRight();
+			}
+		} else{
+			botOutput("Something went wrong during movement. ");
+			exitScript();
+		}
+		int[] currentCoords = getMinimapPosition(map);
+		botOutput("Move from " + startCoords[0] + ", " + startCoords[1] + " to " + currentCoords[0] + ", " + currentCoords[1]);
+		return positionIndex;
 	}
 	public int GS2Movement(int positionIndex, MinimapData map) throws IOException {
 //		Zone stairsZone = new Zone(new int[]{37,34},new int[]{41,46},true);

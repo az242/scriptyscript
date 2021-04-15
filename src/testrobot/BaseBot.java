@@ -174,12 +174,20 @@ public class BaseBot {
 		int[] tempCoords = getMinimapPosition(map);
 		if(tempCoords[0] < zone.getLeftBound()) {
 			while(tempCoords[0] < zone.getLeftBound()) {
-				moveRight(300);
+				if(tempCoords[0] + 11 < zone.getLeftBound()){
+					teleportRight();
+				} else {
+					moveRight(300);
+				}
 				tempCoords = getMinimapPosition(map);
 			}
 		} else if(tempCoords[0] > zone.getRightBound()) {
 			while(tempCoords[0] > zone.getRightBound()) {
-				moveLeft(300);
+				if(tempCoords[0] - 11 > zone.getRightBound()){
+					teleportLeft();
+				} else {
+					moveLeft(300);
+				}
 				tempCoords = getMinimapPosition(map);
 			}
 		}
