@@ -8,31 +8,20 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 public class Bot extends BaseBot{
 	//600 heal minimun 
-	int[][] screens = {{100,200},{100,1000}};
-	int currScreen = 0;
 	Rectangle gs1AFK = new Rectangle(300,425,700,75);
 	Rectangle gs2AFK = new Rectangle(300,425,150,75);
 	MinimapData ulu2 = new MinimapData("ulu2Test",new Rectangle(6,72,145,81), new Rectangle(47,45,70,15),"ulu2Mapname.png");
 	MinimapData gs2Dungeon = new MinimapData("Gs2 Dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"gs2dungeon.png");
 	MinimapData gs2 = new MinimapData("gs2", new Rectangle(6,72,121,53), new Rectangle(47,45,75,15),"gs2mapName.png");
 	MinimapData gs1 = new MinimapData("gs1", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"gs1mapName.png");
-	Rectangle chat = new Rectangle(525,700, 35, 30);
 	ArrayList<Rectangle> areas = new ArrayList<Rectangle>();
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
 	ScriptArea[] scripts = {new ScriptArea("GS1 no move",gs1AFK,495,575), new ScriptArea("GS2 no move",gs2AFK,20,105)};
-	BuffData[] buffs = {
-//			new BuffData("Holy Symbol", 120, KeyEvent.VK_U),
-			new BuffData("Bless", 200, KeyEvent.VK_Y),
-			new BuffData("Invincible", 300, KeyEvent.VK_T),
-			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R)};
-	long[] buffTimers = new long[buffs.length];
-	long hsTimer = 0;
 	
-	public Bot(Robot robot) {
-		super(robot);
+	public Bot(Robot robot, int[][] screens) {
+		super(robot, screens);
 		areas.add(gs1AFK);
 		areas.add(gs2AFK);
-		areas.add(chat);
 		minimapDatas.add(ulu2);
 		minimapDatas.add(gs2Dungeon);
 		minimapDatas.add(gs2);
@@ -40,15 +29,7 @@ public class Bot extends BaseBot{
 		adjustRectangle(mapleScreen,areas);
 		adjustMinimapData(mapleScreen,minimapDatas);
 	}
-	public void onlyRebuff() {
-		swapScreens(0, this.screens);
-		for(int x=0;x<100;x++) {
-			rebuff2();
-			System.out.println("test");
-			robot.delay(randomNum(1000,15000));
-		}
-	}
-	public void sweepFlow(MinimapData map) throws IOException {
+	public void sweepFlow(MinimapData map, int hours) throws IOException {
 		swapScreens(0, this.screens);
 		int[] cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
@@ -57,16 +38,13 @@ public class Bot extends BaseBot{
 		botOutput("Starting at position: " + cords[0] + ", " + cords[1]);
 //		rebuff2();
 		int positionIndex = 0;
-		for(int x=0;x<2000;x++) {
-			System.out.println("<--------------->");
-			System.out.println("iteration " + x);
-			System.out.println("<--------------->");
+		long startTime = System.currentTimeMillis();
+		long currTime = System.currentTimeMillis();
+		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			positionIndex = GS2Movement(positionIndex, map);
-			attack(randomNum(4,6), KeyEvent.VK_V);
-			if(x%53 == 0 && x!=0) {
-				feedPet(0, KeyEvent.VK_PAGE_UP);
-//				feedPet(1, KeyEvent.VK_PAGE_DOWN);
-			}
+			attack(randomNum(2,4), KeyEvent.VK_V, 615);
+			currTime = System.currentTimeMillis();
+			feedPets();
 		}
 		exitScript();
 	}
@@ -109,13 +87,6 @@ public class Bot extends BaseBot{
 					waitOnChat();
 					moveToZoneX(teleUpZone,map);
 					teleportUp();
-					long currTime = System.currentTimeMillis();
-					if(currTime > hsTimer + 102*1000) {
-						botOutput("HSing party...");
-						keyPress(KeyEvent.VK_U);
-						hsTimer = currTime;
-						robot.delay(1750);
-					}
 					teleportUp();
 					currentCoords = getMinimapPosition(map);
 					retries++;
@@ -178,13 +149,6 @@ public class Bot extends BaseBot{
 					waitOnChat();
 					moveToZoneX(teleUpZone,map);
 					teleportUp();
-					long currTime = System.currentTimeMillis();
-					if(currTime > hsTimer + 102*1000) {
-						botOutput("HSing party...");
-						keyPress(KeyEvent.VK_U);
-						hsTimer = currTime;
-						robot.delay(1750);
-					}
 					teleportUp();
 					currentCoords = getMinimapPosition(map);
 					retries++;
@@ -211,7 +175,7 @@ public class Bot extends BaseBot{
 	public int GS2Movement(int positionIndex, MinimapData map) throws IOException {
 //		Zone stairsZone = new Zone(new int[]{37,34},new int[]{41,46},true);
 		Zone dropdownZone = new Zone(new int[]{90,25},new int[]{120,32}); //dropdown
-		Zone teleUpZone = new Zone(new int[]{34,40},new int[]{41,45}); //teleup
+		Zone teleUpZone = new Zone(new int[]{34,40},new int[]{40,45}); //teleup
 		
 		Zone droppedZone = new Zone(new int[]{90,40},new int[]{120,50}); //dropdown
 		Zone teledZone = new Zone(new int[]{10,25},new int[]{41,32}); //teleup
@@ -248,9 +212,7 @@ public class Bot extends BaseBot{
 					waitOnChat();
 					moveToZoneX(teleUpZone,map);
 					teleportUp();
-					botOutput("HSing party...");
-					keyPress(KeyEvent.VK_U);
-					robot.delay(1750);
+					rebuff();
 					teleportUp();
 					currentCoords = getMinimapPosition(map);
 					retries++;
@@ -275,53 +237,32 @@ public class Bot extends BaseBot{
 		return positionIndex;
 	}
 	//teleport moves 11 pixels on minimap
-	public void mainAfkFlow(ScriptArea params, String searchCriteria) throws IOException {
+	public void mainAfkFlow(ScriptArea params, MinimapData map, String searchCriteria) throws IOException {
 		if(params == null) {
 			botOutput("No script with that name found! Exiting...");
 			exitScript();
 		}
 		swapScreens(0, this.screens);
 		botOutput("Starting at position: " + getCurrPosition(params.searchArea,searchCriteria)[0] + " with bounds: " + params.leftBound + ", " + params.rightBound);
-		rebuff2();
+		rebuff();
 		for(int x=0;x<100;x++) {
 			System.out.println("<--------------->");
 			System.out.println("iteration " + x + " with bounds: " + params.leftBound + ", " + params.rightBound);
 			System.out.println("<--------------->");
-			getMinimapPosition(gs2);
+//			getMinimapPosition(gs2);
+			rebuff();
 			randomMove(params.leftBound,params.rightBound, searchCriteria, params.searchArea);
-			attack(100 - randomNum(1,40), KeyEvent.VK_V);
+			int[] currentCoords = getMinimapPosition(map);
+			attack(100 - randomNum(1,40), KeyEvent.VK_V, 615);
 			if(x%9 == 0 && x!=0) {
-				feedPet(0, KeyEvent.VK_PAGE_UP);
+				feedPets();
 //				feedPet(1, KeyEvent.VK_PAGE_DOWN);
 			}
 			if(x%6 == 0 && x!=0) {
 				pickUp(0,randomNum(10,20));
-				robot.delay(500);
+//				robot.delay(500);
 //				pickUp(1,randomNum(10,20));
 			}
-		}
-	}
-	public void pickUp(int screen, int amount) {
-		int temp = currScreen;
-		botOutput("Picking up loot on screen " + screen + " " + amount + " times.");
-		if(screen != currScreen) {
-			swapScreens(screen, this.screens);
-			robot.delay(100);
-			for(int x=0;x<amount;x++) {
-				robot.keyPress(KeyEvent.VK_Z);
-				robot.delay(randomNum(75,200));
-			}
-			robot.keyRelease(KeyEvent.VK_Z);
-			robot.delay(100);
-			swapScreens(temp, this.screens);
-			robot.delay(100);
-		} else {
-			for(int x=0;x<amount;x++) {
-				robot.keyPress(KeyEvent.VK_Z);
-				robot.delay(randomNum(75,200));
-			}
-			robot.keyRelease(KeyEvent.VK_Z);
-			robot.delay(100);
 		}
 	}
 	public void randomMove(int leftBound, int rightBound, String imageRecog, Rectangle area) throws IOException {
@@ -361,74 +302,6 @@ public class Bot extends BaseBot{
 		} else {
 			botOutput("Moving from "+currPosition+" to " + newPosition);
 			robot.delay(randomNum(500,1500));
-		}
-	}
-	public void attack(int numAttacks, int key) throws IOException {
-		int attackDelay = 615;
-//		int attackDelay = 1000;
-		botOutput("Attacking " + numAttacks + " times with " + attackDelay + "ms Delay.");
-		for(int x=0;x<numAttacks;x++) {
-			waitOnChat();
-			rebuff2();
-			robot.keyPress(key);
-			robot.delay(attackDelay + randomPosNeg(randomNum(1,10)));
-		}
-		robot.keyRelease(key);
-	}
-	public void waitOnChat() throws IOException {
-		boolean chatOpen = true;
-		while(chatOpen) {
-			if(getCurrPosition(chat,"chatOpen.png")[0] < 0) {
-				chatOpen = false;
-			} else {
-				botOutput("chat is open! rechecking in 4 seconds...");
-				robot.delay(4000);
-			}
-		}
-	}
-	public ScriptArea getScript(String name) {
-		for(int x=0;x<this.scripts.length;x++) {
-			if(this.scripts[x].name.equals(name)) {
-				return this.scripts[x];
-			}
-		}
-		return null;
-	}
-	
-	public long holySymbol(long newBuffTime) throws InterruptedException {
-		swapScreens(0, this.screens);
-		long tempTime = System.currentTimeMillis();
-		while(tempTime < newBuffTime) {
-			TimeUnit.SECONDS.sleep(1);
-			tempTime = System.currentTimeMillis();
-		}
-		keyPress(KeyEvent.VK_U);
-		return tempTime + 120*1000;
-	}
-	public void rebuff2() {
-		long temptime = System.currentTimeMillis();
-		for(int x=0;x<buffs.length;x++) {
-			if(temptime >= buffTimers[x] + buffs[x].buffLength*1000) {
-				botOutput("Reapplying " + buffs[x].buffName);
-				buffTimers[x] = temptime;
-				keyPress(buffs[x].buffKey);
-				robot.delay(randomNum(1750,2500));
-			}
-		}
-	}
-	public void feedPet(int screen, int key) {
-		int temp = currScreen;
-		botOutput("Feeding pet on Screen " + screen);
-		if(screen != currScreen) {
-			swapScreens(screen, this.screens);
-			robot.delay(100);
-			keyPress(key);
-			robot.delay(100);
-			swapScreens(temp, this.screens);
-			robot.delay(100);
-		} else {
-			keyPress(key);
-			robot.delay(100);
 		}
 	}
 }
