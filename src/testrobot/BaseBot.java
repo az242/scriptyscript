@@ -312,9 +312,6 @@ public abstract class BaseBot {
 	}
 	public void moveToZoneX(Zone zone, MinimapData map) throws IOException {
 		MaplePoint tempCoords = getMinimapPosition(map);
-//		while(zone.isInZone(tempCoords[0], tempCoords[1])) {
-//			
-//		}
 		if(tempCoords.x < zone.getLeftBound()) {
 			robot.keyPress(KeyEvent.VK_RIGHT);
 			while(tempCoords.x < zone.getLeftBound()) {
@@ -344,6 +341,33 @@ public abstract class BaseBot {
 			}
 			robot.keyRelease(KeyEvent.VK_LEFT);
 		}
+	}
+	public void usePortal(Zone portal, Zone checkZone, MinimapData map) throws IOException {
+		Zone upZone = new Zone(new MaplePoint(portal.getLeftBound()-5, portal.getTopBound()), new MaplePoint(portal.getRightBound()+5, portal.getBottomBound()));
+		moveToZoneX(upZone, map);
+		MaplePoint tempCoords = getMinimapPosition(map);
+		while(!checkZone.isInZone(tempCoords)) {
+			if(tempCoords.x < portal.getLeftBound()) {
+				robot.keyPress(KeyEvent.VK_RIGHT);
+				robot.keyPress(KeyEvent.VK_UP);
+				while(tempCoords.x <= portal.getLeftBound() && !checkZone.isInZone(tempCoords)) {
+					robot.delay(50);
+					tempCoords = getMinimapPosition(map);
+				}
+				robot.keyRelease(KeyEvent.VK_RIGHT);
+				robot.keyRelease(KeyEvent.VK_UP);
+			} else if(tempCoords.x > portal.getRightBound()) {
+				robot.keyPress(KeyEvent.VK_LEFT);
+				robot.keyPress(KeyEvent.VK_UP);
+				while(tempCoords.x >= portal.getRightBound()  && !checkZone.isInZone(tempCoords)) {
+					robot.delay(50);
+					tempCoords = getMinimapPosition(map);
+				}
+				robot.keyRelease(KeyEvent.VK_LEFT);
+				robot.keyRelease(KeyEvent.VK_UP);
+			}
+		}
+		robot.delay(300);
 	}
 	public void waitOnChat() throws IOException {
 		boolean chatOpen = true;
