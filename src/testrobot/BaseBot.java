@@ -239,6 +239,7 @@ public abstract class BaseBot {
 	
 	public MinimapData getMap(String name) {
 		for(int x=0;x<minimapDatas.size();x++) {
+			System.out.println(minimapDatas.get(x).name);
 			if(minimapDatas.get(x).name.equals(name)) {
 				return minimapDatas.get(x);
 			}
@@ -427,25 +428,27 @@ public abstract class BaseBot {
 		while(!checkZone.isInZone(tempCoords)) {
 			if(tempCoords.x < portal.getLeftBound()) {
 				robot.keyPress(KeyEvent.VK_RIGHT);
-				robot.keyPress(KeyEvent.VK_UP);
 				while(tempCoords.x <= portal.getLeftBound() && !checkZone.isInZone(tempCoords)) {
+					robot.keyPress(KeyEvent.VK_UP);
 					robot.delay(50);
 					tempCoords = getMinimapPosition(map);
 				}
 				robot.keyRelease(KeyEvent.VK_RIGHT);
-				robot.keyRelease(KeyEvent.VK_UP);
 			} else if(tempCoords.x > portal.getRightBound()) {
 				robot.keyPress(KeyEvent.VK_LEFT);
-				robot.keyPress(KeyEvent.VK_UP);
 				while(tempCoords.x >= portal.getRightBound()  && !checkZone.isInZone(tempCoords)) {
+					robot.keyPress(KeyEvent.VK_UP);
 					robot.delay(50);
 					tempCoords = getMinimapPosition(map);
 				}
 				robot.keyRelease(KeyEvent.VK_LEFT);
-				robot.keyRelease(KeyEvent.VK_UP);
 			}
+			robot.keyRelease(KeyEvent.VK_UP);
+			tempCoords = getMinimapPosition(map);
+			robot.delay(200);
 		}
 		robot.delay(300);
+		System.out.println("finished portal");
 	}
 	public void waitOnChat() throws IOException {
 		boolean chatOpen = true;

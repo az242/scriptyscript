@@ -7,8 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class NLC extends BaseBot{
-	MinimapData wolfSpider = new MinimapData("Wolf Spiders", new Rectangle(6,72,201,136), new Rectangle(47,45,115,15),"wsName.png");
-	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
+	MinimapData wolfSpider = new MinimapData("Wolf Spiders", new Rectangle(6,72,201,136), new Rectangle(47,45,115,15),"minimapNames/wsName.png");
 	long dropTimer = 0;
 	public NLC(Robot robot, Screen[] screens) {
 		super(robot, screens);
@@ -31,6 +30,7 @@ public class NLC extends BaseBot{
 			position = wolfSpiderMovement(position, map);
 			botOutput("Moved to position index: " + position);
 			attack(1, KeyEvent.VK_C, 2750);
+			attack(1, KeyEvent.VK_V, 615);
 			feedPets();
 		}
 		exitScript();
@@ -51,7 +51,7 @@ public class NLC extends BaseBot{
 		switch(position) {
 		case 0:
 			moveToZoneX(botTeleRight, map);
-			rebuff(.6);
+			rebuff(.5);
 			usePortal(botTeleRight, midTeleCheckRight, map);
 			Zone attackZone1 = new Zone(new MaplePoint(158,83), new MaplePoint(164,88));
 			moveToZoneX(attackZone1, map);

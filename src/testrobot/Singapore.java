@@ -49,6 +49,7 @@ public class Singapore extends BaseBot{
 			botOutput("Moved to position index: " + position);
 			robot.delay(400);
 			attackheal();
+//			attack(1, KeyEvent.VK_C, 2750);
 			feedPets();
 			currTime = System.currentTimeMillis();
 			LocalTime now = LocalTime.now();
@@ -181,7 +182,7 @@ public class Singapore extends BaseBot{
 			moveToZoneX(leftSide, map);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
-			HolySymbol();
+			rebuff(.8);
 			return 1;
 		} else{
 			moveToZoneX(rightSide, map);
@@ -209,7 +210,7 @@ public class Singapore extends BaseBot{
 		if(dropdownZone.isInYZone(startCoords)) {
 			MaplePoint currentCoords = getMinimapPosition(map);
 			int retries = 0;
-			while(!droppedZone.isInYZone(currentCoords) && retries < 5){
+			while(!droppedZone.isInYZone(currentCoords) && retries < 10){
 				botOutput("Trying to drop down...");
 				waitOnChat();
 				moveToZoneX(dropdownZone,map);
@@ -217,7 +218,7 @@ public class Singapore extends BaseBot{
 				currentCoords = getMinimapPosition(map);
 				retries++;
 			}
-			if(retries == 5) {
+			if(retries == 10) {
 				botOutput("Failed to drop. Exiting...");
 				exitScript();
 			} else {
@@ -226,7 +227,7 @@ public class Singapore extends BaseBot{
 		}else if(teleUpZone.isInYZone(startCoords)){
 			MaplePoint currentCoords = getMinimapPosition(map);
 			int retries = 0;
-			while(!teledZone.isInYZone(currentCoords) && retries < 5){
+			while(!teledZone.isInYZone(currentCoords) && retries < 15){
 				botOutput("Trying to tele up...");
 				waitOnChat();
 				moveToZoneX(teleUpZone,map);
@@ -235,7 +236,7 @@ public class Singapore extends BaseBot{
 				currentCoords = getMinimapPosition(map);
 				retries++;
 			}
-			if(retries == 5) {
+			if(retries == 15) {
 				botOutput("Failed to teleport up. Exiting...");
 				exitScript();
 			} else {
