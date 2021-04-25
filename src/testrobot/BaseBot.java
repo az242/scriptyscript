@@ -315,23 +315,30 @@ public abstract class BaseBot {
 			}
 		}
 	}
-//	public void swapMapleScreen() throws IOException {
-//		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
-//		upperLeft.y = upperLeft.y + 1400;
-//		outputCoords(upperLeft); 
-//		int width = this.screens.length*165;
-//		//85 735
-//		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
-//		click(upperLeft);
-//		robot.delay(500);
-//		for(int x=0;x<this.screens.length;x++) {
-//			MaplePoint temp = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
-//			outputCoords(temp); 
-//		}
-//		BufferedImage bi = robot.createScreenCapture(new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165));  // retrieve image
-//	    File outputfile = new File("saved2.png");
-//	    ImageIO.write(bi, "png", outputfile);
-//	}
+	public void swapMapleScreen(Screen screen) throws IOException {
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1400;
+		outputCoords(upperLeft); 
+		int width = this.screens.length*165;
+		//85 735 60 24
+		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
+		click(upperLeft);
+		robot.delay(1000);
+		clickZone = new Rectangle(upperLeft.x-(width/2) + (165*screen.index) ,upperLeft.y-165,width - (165*screen.index),165);
+		MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
+		//find icon
+		if(foundIcon.x > 0) {
+			foundIcon.x += clickZone.x;
+			foundIcon.y += clickZone.y;
+			botOutput("Found screen " + screen.index + ". Verifying character...");
+			click(foundIcon);
+			robot.delay(500);
+		}else {
+			//couldnt find expect amount of screens, exit.
+			botOutput("Couldn't find expect number of screens. Exiting...");
+			exitScript();
+		}
+	}
 	public Rectangle getMapleScreen() throws IOException {
 		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,0,1920,1080), "mapleIcon.png");
 		BufferedImage bi = robot.createScreenCapture(new Rectangle(upperLeft.x-3,upperLeft.y+ 21,1025,768));  // retrieve image
