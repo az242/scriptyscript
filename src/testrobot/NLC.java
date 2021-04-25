@@ -13,7 +13,7 @@ public class NLC extends BaseBot{
 	public NLC(Robot robot, Screen[] screens) {
 		super(robot, screens);
 		minimapDatas.add(wolfSpider);
-		adjustMinimapData(mapleScreen,minimapDatas);
+		adjustMinimapData(mapleScreen);
 	}
 	public void leech(int hours, MinimapData map) throws IOException {
 		swapScreens(getScreen("bishop"));

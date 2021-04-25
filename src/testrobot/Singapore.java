@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.time.LocalTime;
 
 public class Singapore extends BaseBot{
-	MinimapData gs2Dungeon = new MinimapData("Gs2 Dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"minimapNames/gs2dungeon.png");
+	MinimapData gs2Dungeon = new MinimapData("gs2dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"minimapNames/gs2dungeon.png");
 	MinimapData gs2 = new MinimapData("gs2", new Rectangle(6,72,121,53), new Rectangle(47,45,75,15),"minimapNames/gs2mapName.png");
 	MinimapData gs1 = new MinimapData("gs1", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"minimapNames/gs1mapName.png");
 	
@@ -27,7 +27,7 @@ public class Singapore extends BaseBot{
 		minimapDatas.add(gs2);
 		minimapDatas.add(gs1);
 		minimapDatas.add(ulu2);
-		adjustMinimapData(mapleScreen,minimapDatas);
+		adjustMinimapData(mapleScreen);
 	}
 
 	@Override

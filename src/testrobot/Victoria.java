@@ -17,7 +17,7 @@ public class Victoria extends BaseBot{
 		minimapDatas.add(ironboar);
 		minimapDatas.add(bubbling);
 		minimapDatas.add(jrwraith);
-		adjustMinimapData(mapleScreen,minimapDatas);
+		adjustMinimapData(mapleScreen);
 	}
 	
 	public void leech(int hours, MinimapData map) throws IOException {

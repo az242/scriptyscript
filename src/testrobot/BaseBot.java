@@ -29,7 +29,9 @@ class MaplePoint {
 class Screen {
 	int x;
 	int y;
+	int index;
 	String name;
+	String file;
 	boolean pet;
 	long petTimer = 0;
 	public Screen(String name, int x, int y, boolean pet) {
@@ -43,6 +45,11 @@ class Screen {
 		this.y=y;
 		this.name = name;
 		this.pet=false;
+	}
+	public Screen(String name, String fileIdentifier) {
+		this.name = name;
+		this.file = fileIdentifier;
+		this.index = -1;
 	}
 }
 class ScriptArea {
@@ -208,11 +215,17 @@ public abstract class BaseBot {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 		chat = adjustRectangle(mapleScreen, chat);
 		home= adjustRectangle(mapleScreen, new Rectangle(875, 723, 10, 12));
 		insert = adjustRectangle(mapleScreen, new Rectangle(840, 723, 10, 12));
 		pageUp = adjustRectangle(mapleScreen, new Rectangle(910, 723, 10, 12));
+		try {
+			initScreens();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public void enableSkill(String skillName) {
 		for(int x=0;x<buffs.length;x++) {
@@ -239,28 +252,86 @@ public abstract class BaseBot {
 	public ArrayList<Rectangle> adjustRectangle(Rectangle mapleScreen, ArrayList<Rectangle> areas) {
 		for(int x=0;x<areas.size();x++) {
 			areas.get(x).setLocation((int)(mapleScreen.getX() + areas.get(x).getX()),(int)( mapleScreen.getY() + areas.get(x).getY()));
-			botOutput("adjusted Search Area" + areas.get(x).getX() + ", " + areas.get(x).getY());
 		}
 		return areas;
 	}
 	public Rectangle adjustRectangle(Rectangle mapleScreen, Rectangle area) {
 		area.setLocation((int)(mapleScreen.getX() + area.getX()),(int)( mapleScreen.getY() + area.getY()));
-		botOutput("adjusted Search Area" + area.getX() + ", " + area.getY());
+//		botOutput("adjusted Search Area" + area.getX() + ", " + area.getY());
 		return area;
 	}
-	public ArrayList<MinimapData> adjustMinimapData(Rectangle mapleScreen, ArrayList<MinimapData> data) {
-		for(int x=0;x<data.size();x++) {
-			data.get(x).adjustPoint((int)mapleScreen.getX(), (int)mapleScreen.getY());
-			botOutput("adjusted map data for " + data.get(x).name);
+	public void adjustMinimapData(Rectangle mapleScreen) {
+		for(int x=0;x<minimapDatas.size();x++) {
+			minimapDatas.get(x).adjustPoint((int)mapleScreen.getX(), (int)mapleScreen.getY());
+			botOutput("Adjusted map data for " + minimapDatas.get(x).name);
 		}
-		return data;
 	}
-	public int[][] adjustScreens(Rectangle mapleScreen, int[][] screens) {
-		for(int x=0;x<screens.length;x++) {
-			screens[x] = new int[] { screens[x][0] + (int)mapleScreen.getX(), screens[x][1] + (int)mapleScreen.getY()};
+	public void initScreens() throws IOException {
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1400;
+		outputCoords(upperLeft); 
+		int width = this.screens.length*165;
+		//85 735 60 24
+		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
+		click(upperLeft);
+		robot.delay(1000);
+		for(int x=0;x<this.screens.length;x++) {
+			clickZone = new Rectangle(upperLeft.x-(width/2) + (165*x) ,upperLeft.y-165,width - (165*x),165);
+			MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
+			//find icon
+			if(foundIcon.x > 0) {
+				foundIcon.x += clickZone.x;
+				foundIcon.y += clickZone.y;
+				botOutput("Found screen " + x + ". Verifying character...");
+				click(foundIcon);
+				robot.delay(500);
+				Rectangle nameSearch = new Rectangle(85,735, 65, 30);
+				nameSearch = adjustRectangle(this.mapleScreen, nameSearch);
+				boolean found = false;
+				for(int i=0;i<this.screens.length;i++) {
+					if(this.screens[i].index < 0 ) {
+						botOutput("Checking if this screen is " + this.screens[i].name);
+						MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
+						if(foundName.x > 0) {
+							this.screens[i].index = x;
+							found = true;
+							botOutput("Verified: " + this.screens[i].name);
+							break;
+						}
+					}
+				}
+				if(!found) {
+					// exit warning theres a unrecognized character
+					BufferedImage bi = robot.createScreenCapture(nameSearch);  // retrieve image
+				    File outputfile = new File("nameTest.png");
+				    ImageIO.write(bi, "png", outputfile);
+					botOutput("Unrecognized character. Exiting...");
+					exitScript();
+				}
+			}else {
+				//couldnt find expect amount of screens, exit.
+				botOutput("Couldn't find expect number of screens. Exiting...");
+				exitScript();
+			}
 		}
-		return screens;
 	}
+//	public void swapMapleScreen() throws IOException {
+//		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
+//		upperLeft.y = upperLeft.y + 1400;
+//		outputCoords(upperLeft); 
+//		int width = this.screens.length*165;
+//		//85 735
+//		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
+//		click(upperLeft);
+//		robot.delay(500);
+//		for(int x=0;x<this.screens.length;x++) {
+//			MaplePoint temp = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
+//			outputCoords(temp); 
+//		}
+//		BufferedImage bi = robot.createScreenCapture(new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165));  // retrieve image
+//	    File outputfile = new File("saved2.png");
+//	    ImageIO.write(bi, "png", outputfile);
+//	}
 	public Rectangle getMapleScreen() throws IOException {
 		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,0,1920,1080), "mapleIcon.png");
 		BufferedImage bi = robot.createScreenCapture(new Rectangle(upperLeft.x-3,upperLeft.y+ 21,1025,768));  // retrieve image
@@ -418,23 +489,7 @@ public abstract class BaseBot {
 				robot.delay(100);
 			}
 		}
-		if(currScreen != oldScreen) {
-			swapScreens(getScreen(oldScreen));
-		}
-	}
-	public void rebuff() {
-		long temptime = System.currentTimeMillis();
-		String oldScreen = new String(currScreen);
-		for(int x=0;x<buffs.length;x++) {
-			if(buffs[x].enabled && temptime >= buffTimers[x] + buffs[x].buffLength*1000) {
-				swapScreens(getScreen(buffs[x].screen));
-				botOutput("Reapplying " + buffs[x].buffName);
-				buffTimers[x] = temptime;
-				keyPress(buffs[x].buffKey);
-				robot.delay(buffs[x].delay);
-			}
-		}
-		if(oldScreen != currScreen) {
+		if(currScreen.equals(oldScreen)) {
 			swapScreens(getScreen(oldScreen));
 		}
 	}
@@ -493,6 +548,11 @@ public abstract class BaseBot {
 	}
 	public void click(int x, int y) {
 		robot.mouseMove(x, y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+	}
+	public void click(MaplePoint point) {
+		robot.mouseMove(point.x, point.y);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
