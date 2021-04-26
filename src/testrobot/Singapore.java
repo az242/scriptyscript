@@ -49,9 +49,9 @@ public class Singapore extends BaseBot{
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
 			robot.delay(400);
-//			attackheal();
-			attack(1, KeyEvent.VK_C, 2750);
-			attack(1, KeyEvent.VK_V, 620);
+			attackheal();
+//			attack(1, KeyEvent.VK_C, 2750);
+//			attack(1, KeyEvent.VK_V, 620);
 			feedPets();
 			currTime = System.currentTimeMillis();
 			LocalTime now = LocalTime.now();

@@ -29,7 +29,7 @@ public class NLC extends BaseBot{
 			checkPots();
 			position = wolfSpiderMovement(position, map);
 			botOutput("Moved to position index: " + position);
-			attack(1, KeyEvent.VK_C, 2750);
+			attack(1, KeyEvent.VK_C, 2750,3500);
 			attack(1, KeyEvent.VK_V, 615);
 			feedPets();
 		}

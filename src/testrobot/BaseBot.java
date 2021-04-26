@@ -197,6 +197,7 @@ public abstract class BaseBot {
 			new BuffData("Maple Warrior", 270, KeyEvent.VK_D,1600,"bishop")
 	};
 	long[] buffTimers = new long[buffs.length];
+	BufferedImage[] numImages;
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
 	public BaseBot(Robot robot, Screen[] screens) {
 		this.robot = robot;
@@ -215,6 +216,15 @@ public abstract class BaseBot {
 		pageUp = adjustRectangle(mapleScreen, new Rectangle(910, 723, 10, 12));
 		try {
 			initScreens();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			numImages = new BufferedImage[]{
+					ImageIO.read(new File("numbers/0.png")),ImageIO.read(new File("numbers/1.png")),ImageIO.read(new File("numbers/2.png"))
+					,ImageIO.read(new File("numbers/3.png")),ImageIO.read(new File("numbers/4.png")),ImageIO.read(new File("numbers/5.png")),
+					ImageIO.read(new File("numbers/6.png")),ImageIO.read(new File("numbers/7.png")),ImageIO.read(new File("numbers/8.png")),ImageIO.read(new File("numbers/9.png"))};
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -379,26 +389,29 @@ public abstract class BaseBot {
 		return new MaplePoint(-1,-1);
 	}
 	public int getMp() throws IOException {
-		String nums[] = {"numbers/0.png", "numbers/1.png", "numbers/2.png", 
-				"numbers/3.png","numbers/4.png","numbers/5.png",
-				"numbers/6.png","numbers/7.png", "numbers/8.png","numbers/9.png" };
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
 		boolean foundNumber = false;
 		int mp = 0;
 //		Zone nextNumZone = new Zone(new MaplePoint(347,739),new MaplePoint(351,745));
 		Rectangle nextNum = new Rectangle(347,739,5,7);
+		nextNum = adjustRectangle(mapleScreen,nextNum);
 		do {
 			foundNumber = false;
-			nextNum.setLocation((int) (nextNum.getX()+6), 739);
-			for(int x=0;x<nums.length;x++) {
-				if(findNum(nextNum,nums[x])) {
-					numbersFound.add(x);
+			nextNum.setLocation((int) (nextNum.getX()+6), (int) nextNum.getY());
+			int numToAdd = 0;
+			for(int x=0;x<numImages.length;x++) {
+//				System.out.println("checking " + x);
+				if(findNum(nextNum,numImages[x])) {
+					numToAdd = x;
 					foundNumber = true;
 				}
 			}
+			if(foundNumber) {
+				numbersFound.add(numToAdd);
+			}
 		}while(foundNumber);
 		for(int x=0;x<numbersFound.size();x++) {
-			mp = mp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
+			mp = (int) (mp + numbersFound.get(x)*Math.pow(10, numbersFound.size()-x-1));
 		}
 		//each num 5x7
 		//1 pixel inbetween numbers
@@ -406,18 +419,15 @@ public abstract class BaseBot {
 		return mp;
 	}
 	public int getHp() throws IOException {
-		String nums[] = {"numbers/0.png", "numbers/1.png", "numbers/2.png", 
-				"numbers/3.png","numbers/4.png","numbers/5.png",
-				"numbers/6.png","numbers/7.png", "numbers/8.png","numbers/9.png" };
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
 		boolean foundNumber = false;
 		int hp = 0;
-		Rectangle nextNum = new Rectangle(235,739,5,7);
+		Rectangle nextNum = new Rectangle(234,739,5,7);
 		do {
 			foundNumber = false;
 			nextNum.setLocation((int) (nextNum.getX()+6), 739);
-			for(int x=0;x<nums.length;x++) {
-				if(findNum(nextNum,nums[x])) {
+			for(int x=0;x<numImages.length;x++) {
+				if(findNum(nextNum,numImages[x])) {
 					numbersFound.add(x);
 					foundNumber = true;
 				}
@@ -428,11 +438,10 @@ public abstract class BaseBot {
 		}
 		return hp;
 	}
-	public boolean findNum(Rectangle rect, String fileName) throws IOException {
-		BufferedImage imageRecog = ImageIO.read(new File(fileName));
+	public boolean findNum(Rectangle rect, BufferedImage imageRecog) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
-		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth();x1++) {
-			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight();y1++) {
+		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth()+1;x1++) {
+			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight()+1;y1++) {
 				boolean matches = true;
 				for(int x2=0;x2<imageRecog.getWidth();x2++) {
 					for(int y2=0;y2<imageRecog.getHeight();y2++) {
@@ -452,8 +461,8 @@ public abstract class BaseBot {
 				}
 			}
 		}
-//		File outputfile = new File("numFind.png");
-//	    ImageIO.write(image, "png", outputfile);
+		File outputfile = new File("numFind.png");
+	    ImageIO.write(image, "png", outputfile);
 		return false;
 	}
 	public void checkPots() throws IOException {
@@ -604,6 +613,23 @@ public abstract class BaseBot {
 			robot.keyPress(key);
 			robot.keyPress(key);
 			robot.keyPress(key);
+			robot.delay(delay + randomPosNeg(randomNum(1,10)));
+		}
+		robot.keyRelease(key);
+	}
+	public void attack(int numAttacks, int key, int delay, int mpCost) throws IOException {
+		botOutput("Attacking " + numAttacks + " times with " + delay + "ms Delay.");
+		int originalMp = getMp();
+		for(int x=0;x<numAttacks;x++) {
+			waitOnChat();
+			robot.keyPress(key);
+			int newMp = getMp();
+			while(Math.abs(originalMp-newMp) < mpCost) {
+				robot.keyPress(key);
+				robot.delay(25);
+				botOutput("Failed to attack... retrying");
+				newMp = getMp();
+			}
 			robot.delay(delay + randomPosNeg(randomNum(1,10)));
 		}
 		robot.keyRelease(key);
