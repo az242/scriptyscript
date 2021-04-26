@@ -2,6 +2,7 @@ package testrobot;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
@@ -376,6 +377,84 @@ public abstract class BaseBot {
 		File outputfile = new File("couldFind.png");
 	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
+	}
+	public int getMp() throws IOException {
+		String nums[] = {"numbers/0.png", "numbers/1.png", "numbers/2.png", 
+				"numbers/3.png","numbers/4.png","numbers/5.png",
+				"numbers/6.png","numbers/7.png", "numbers/8.png","numbers/9.png" };
+		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
+		boolean foundNumber = false;
+		int mp = 0;
+//		Zone nextNumZone = new Zone(new MaplePoint(347,739),new MaplePoint(351,745));
+		Rectangle nextNum = new Rectangle(347,739,5,7);
+		do {
+			foundNumber = false;
+			nextNum.setLocation((int) (nextNum.getX()+6), 739);
+			for(int x=0;x<nums.length;x++) {
+				if(findNum(nextNum,nums[x])) {
+					numbersFound.add(x);
+					foundNumber = true;
+				}
+			}
+		}while(foundNumber);
+		for(int x=0;x<numbersFound.size();x++) {
+			mp = mp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
+		}
+		//each num 5x7
+		//1 pixel inbetween numbers
+		//starts at 353 739
+		return mp;
+	}
+	public int getHp() throws IOException {
+		String nums[] = {"numbers/0.png", "numbers/1.png", "numbers/2.png", 
+				"numbers/3.png","numbers/4.png","numbers/5.png",
+				"numbers/6.png","numbers/7.png", "numbers/8.png","numbers/9.png" };
+		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
+		boolean foundNumber = false;
+		int hp = 0;
+		Rectangle nextNum = new Rectangle(235,739,5,7);
+		do {
+			foundNumber = false;
+			nextNum.setLocation((int) (nextNum.getX()+6), 739);
+			for(int x=0;x<nums.length;x++) {
+				if(findNum(nextNum,nums[x])) {
+					numbersFound.add(x);
+					foundNumber = true;
+				}
+			}
+		}while(foundNumber);
+		for(int x=0;x<numbersFound.size();x++) {
+			hp = hp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
+		}
+		return hp;
+	}
+	public boolean findNum(Rectangle rect, String fileName) throws IOException {
+		BufferedImage imageRecog = ImageIO.read(new File(fileName));
+		BufferedImage image = robot.createScreenCapture(rect);
+		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth();x1++) {
+			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight();y1++) {
+				boolean matches = true;
+				for(int x2=0;x2<imageRecog.getWidth();x2++) {
+					for(int y2=0;y2<imageRecog.getHeight();y2++) {
+						Color pic1 = new Color(imageRecog.getRGB(x2, y2));
+						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
+							if(imageRecog.getRGB(x2, y2) != image.getRGB(x1+x2, y1+y2)) {
+								matches = false;
+							}
+						}
+					}
+				}
+				if(matches) {
+//					File outputfile = new File("numFind.png");
+//				    ImageIO.write(image, "png", outputfile);
+//					System.out.println(x1 + ", " + y1);
+					return true;
+				}
+			}
+		}
+//		File outputfile = new File("numFind.png");
+//	    ImageIO.write(image, "png", outputfile);
+		return false;
 	}
 	public void checkPots() throws IOException {
 		MaplePoint insertFound = getCurrPosition(insert,"potions/0unagi.png");
