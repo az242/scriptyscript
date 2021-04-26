@@ -27,24 +27,16 @@ class MaplePoint {
 	}
 }
 class Screen {
-	int x;
-	int y;
 	int index;
 	String name;
 	String file;
 	boolean pet;
 	long petTimer = 0;
-	public Screen(String name, int x, int y, boolean pet) {
-		this.x=x;
-		this.y=y;
+	public Screen(String name, String fileIdentifier, boolean pet) {
+		this.name = name;
+		this.file = fileIdentifier;
+		this.index = -1;
 		this.pet=pet;
-		this.name = name;
-	}
-	public Screen(String name,int x, int y) {
-		this.x=x;
-		this.y=y;
-		this.name = name;
-		this.pet=false;
 	}
 	public Screen(String name, String fileIdentifier) {
 		this.name = name;
@@ -209,7 +201,7 @@ public abstract class BaseBot {
 		this.robot = robot;
 		this.screens = screens;
 		startTime = LocalTime.now();
-		botOutput("Starting bot with " + screens.length + " screens.");
+		botOutput("Initializing bot with " + screens.length + " screens.");
 		try {
 			mapleScreen = getMapleScreen();
 		} catch (IOException e) {
@@ -268,15 +260,16 @@ public abstract class BaseBot {
 		}
 	}
 	public void initScreens() throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
-		upperLeft.y = upperLeft.y + 1400;
-		outputCoords(upperLeft); 
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(300,1050,200,30), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1050;
+		upperLeft.x = upperLeft.x + 300;
+//		outputCoords(upperLeft); 
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
-		click(upperLeft);
-		robot.delay(1000);
 		for(int x=0;x<this.screens.length;x++) {
+			click(upperLeft);
+			robot.delay(1000);
 			clickZone = new Rectangle(upperLeft.x-(width/2) + (165*x) ,upperLeft.y-165,width - (165*x),165);
 			MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
 			//find icon
@@ -291,12 +284,12 @@ public abstract class BaseBot {
 				boolean found = false;
 				for(int i=0;i<this.screens.length;i++) {
 					if(this.screens[i].index < 0 ) {
-						botOutput("Checking if this screen is " + this.screens[i].name);
+//						botOutput("Checking if this screen is " + this.screens[i].name);
 						MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
 						if(foundName.x > 0) {
 							this.screens[i].index = x;
 							found = true;
-							botOutput("Verified: " + this.screens[i].name);
+							botOutput("Verified: " + this.screens[i].name + " on screen " + x);
 							break;
 						}
 					}
@@ -317,23 +310,27 @@ public abstract class BaseBot {
 		}
 	}
 	public void swapMapleScreen(Screen screen) throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,1400,2560,40), "mapleTaskIcon.png");
-		upperLeft.y = upperLeft.y + 1400;
-		outputCoords(upperLeft); 
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(300,1050,200,30), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1050;
+		upperLeft.x = upperLeft.x + 300;
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
 		click(upperLeft);
-		robot.delay(1000);
-		clickZone = new Rectangle(upperLeft.x-(width/2) + (165*screen.index) ,upperLeft.y-165,width - (165*screen.index),165);
+		robot.delay(400);
+		clickZone = new Rectangle(upperLeft.x-(width/2) + 
+				(165*screen.index) ,
+				upperLeft.y-165,width 
+				- (165*screen.index),165);
 		MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
 		//find icon
 		if(foundIcon.x > 0) {
 			foundIcon.x += clickZone.x;
 			foundIcon.y += clickZone.y;
-			botOutput("Found screen " + screen.index + ". Verifying character...");
+			botOutput("Swapped to screen " + screen.index);
 			click(foundIcon);
-			robot.delay(500);
+			this.currScreen = screen.name;
+			robot.delay(200);
 		}else {
 			//couldnt find expect amount of screens, exit.
 			botOutput("Couldn't find expect number of screens. Exiting...");
@@ -426,7 +423,7 @@ public abstract class BaseBot {
 		moveToZoneX(upZone, map);
 		MaplePoint tempCoords = getMinimapPosition(map);
 		while(!checkZone.isInZone(tempCoords)) {
-			if(tempCoords.x < portal.getLeftBound()) {
+			if(tempCoords.x <= portal.getLeftBound()) {
 				robot.keyPress(KeyEvent.VK_RIGHT);
 				while(tempCoords.x <= portal.getLeftBound() && !checkZone.isInZone(tempCoords)) {
 					robot.keyPress(KeyEvent.VK_UP);
@@ -434,7 +431,7 @@ public abstract class BaseBot {
 					tempCoords = getMinimapPosition(map);
 				}
 				robot.keyRelease(KeyEvent.VK_RIGHT);
-			} else if(tempCoords.x > portal.getRightBound()) {
+			} else if(tempCoords.x >= portal.getRightBound()) {
 				robot.keyPress(KeyEvent.VK_LEFT);
 				while(tempCoords.x >= portal.getRightBound()  && !checkZone.isInZone(tempCoords)) {
 					robot.keyPress(KeyEvent.VK_UP);
@@ -448,7 +445,7 @@ public abstract class BaseBot {
 			robot.delay(200);
 		}
 		robot.delay(300);
-		System.out.println("finished portal");
+//		System.out.println("finished portal");
 	}
 	public void waitOnChat() throws IOException {
 		boolean chatOpen = true;
@@ -461,11 +458,11 @@ public abstract class BaseBot {
 			}
 		}
 	}
-	public void pickUp(String screen, int amount) {
+	public void pickUp(String screen, int amount) throws IOException {
 		String temp = new String(currScreen);
 		botOutput("Picking up loot on screen " + screen + " " + amount + " times.");
 		if(screen != currScreen) {
-			swapScreens(getScreen(screen));
+			swapMapleScreen(getScreen(screen));
 			robot.delay(100);
 			for(int x=0;x<amount;x++) {
 				robot.keyPress(KeyEvent.VK_Z);
@@ -473,7 +470,7 @@ public abstract class BaseBot {
 			}
 			robot.keyRelease(KeyEvent.VK_Z);
 			robot.delay(100);
-			swapScreens(getScreen(temp));
+			swapMapleScreen(getScreen(temp));
 			robot.delay(100);
 		} else {
 			for(int x=0;x<amount;x++) {
@@ -484,13 +481,13 @@ public abstract class BaseBot {
 			robot.delay(100);
 		}
 	}
-	public void feedPets() {
+	public void feedPets() throws IOException {
 		long currTime = System.currentTimeMillis();
 		String oldScreen = new String(currScreen);
 		for(int x=0;x<this.screens.length;x++) {
 			if(this.screens[x].pet && this.screens[x].petTimer + 180 * 1000 < currTime) {
 				if(!this.screens[x].name.equals(currScreen)) {
-					swapScreens(getScreen(this.screens[x].name));
+					swapMapleScreen(getScreen(this.screens[x].name));
 				}
 				robot.delay(100);
 				this.screens[x].petTimer = currTime;
@@ -499,17 +496,17 @@ public abstract class BaseBot {
 				robot.delay(100);
 			}
 		}
-		if(currScreen.equals(oldScreen)) {
-			swapScreens(getScreen(oldScreen));
+		if(!currScreen.equals(oldScreen)) {
+			swapMapleScreen(getScreen(oldScreen));
 		}
 	}
-	public void rebuff(double buffDuration) {
+	public void rebuff(double buffDuration) throws IOException {
 		long temptime = System.currentTimeMillis();
 		String oldScreen = new String(currScreen);
 		for(int x=0;x<buffs.length;x++) {
 			if(buffs[x].enabled && (temptime >= buffTimers[x] + ((buffs[x].buffLength*1000) * buffDuration))) {
 				if(!currScreen.equals(buffs[x].screen)) {
-					swapScreens(getScreen(buffs[x].screen));
+					swapMapleScreen(getScreen(buffs[x].screen));
 				}
 				botOutput("Reapplying " + buffs[x].buffName);
 				buffTimers[x] = temptime;
@@ -517,8 +514,8 @@ public abstract class BaseBot {
 				robot.delay(buffs[x].delay);
 			}
 		}
-		if(oldScreen != currScreen) {
-			swapScreens(getScreen(oldScreen));
+		if(!oldScreen.equals(currScreen)) {
+			swapMapleScreen(getScreen(oldScreen));
 		}
 	}
 	public void attack(int numAttacks, int key, int delay) throws IOException {
@@ -539,11 +536,6 @@ public abstract class BaseBot {
 			}
 		}
 		return null;
-	}
-	public void swapScreens(Screen screen) {
-		click(screen.x,screen.y);
-		currScreen = screen.name;
-		robot.delay(200);
 	}
 	public int randomPosNeg(int input) {
 		double random = Math.random();

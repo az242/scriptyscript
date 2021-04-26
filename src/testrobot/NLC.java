@@ -15,7 +15,7 @@ public class NLC extends BaseBot{
 		adjustMinimapData(mapleScreen);
 	}
 	public void leech(int hours, MinimapData map) throws IOException {
-		swapScreens(getScreen("bishop"));
+		swapMapleScreen(getScreen("bishop"));
 		MaplePoint cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
 		System.out.println("Starting leech script");
@@ -42,7 +42,7 @@ public class NLC extends BaseBot{
 		Zone midTeleCheckRight = new Zone(new MaplePoint(144,86), new MaplePoint(152,100));
 		Zone topTeleRight = new Zone(new MaplePoint(183,48), new MaplePoint(193,55));
 		
-		Zone middleAttack = new Zone(new MaplePoint(95,104), new MaplePoint(106,118));
+		Zone middleAttack = new Zone(new MaplePoint(97,104), new MaplePoint(104,118));
 		
 		Zone botTeleLeft = new Zone(new MaplePoint(82,109), new MaplePoint(83,115));
 		Zone midTeleLeft = new Zone(new MaplePoint(48,87), new MaplePoint(48,91));

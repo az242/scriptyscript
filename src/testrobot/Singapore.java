@@ -27,12 +27,13 @@ public class Singapore extends BaseBot{
 		minimapDatas.add(gs2);
 		minimapDatas.add(gs1);
 		minimapDatas.add(ulu2);
+		minimapDatas.add(cd);
 		adjustMinimapData(mapleScreen);
 	}
 
 	@Override
 	public void leech(int hours, MinimapData map) throws IOException {
-		swapScreens(getScreen("bishop"));
+		swapMapleScreen(getScreen("bishop"));
 		MaplePoint cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
 		System.out.println("Starting leech script");
@@ -48,8 +49,9 @@ public class Singapore extends BaseBot{
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
 			robot.delay(400);
-			attackheal();
-//			attack(1, KeyEvent.VK_C, 2750);
+//			attackheal();
+			attack(1, KeyEvent.VK_C, 2750);
+			attack(1, KeyEvent.VK_V, 620);
 			feedPets();
 			currTime = System.currentTimeMillis();
 			LocalTime now = LocalTime.now();
@@ -66,6 +68,8 @@ public class Singapore extends BaseBot{
 			return ulu2(position, map);
 		case "gs2":
 			return GS2Movement(position, map);
+		case "cds":
+			return cdMovement(position, map);
 		}
 		return 0;
 	}
@@ -169,7 +173,7 @@ public class Singapore extends BaseBot{
 		robot.keyRelease(KeyEvent.VK_C);
 	}
 	public int GS2Movement(int position, MinimapData map) throws IOException {
-		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(52,45));
+		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(50,45));
 		Zone rightSide = new Zone(new MaplePoint(80,23),new MaplePoint(92,45));
 		long currTime = System.currentTimeMillis();
 		if(currTime > dropTimer + 180*1000 && position == 1) {
