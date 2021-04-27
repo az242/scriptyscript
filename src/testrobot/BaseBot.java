@@ -198,6 +198,7 @@ public abstract class BaseBot {
 	};
 	long[] buffTimers = new long[buffs.length];
 	BufferedImage[] numImages;
+	BufferedImage[] levelImages;
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
 	public BaseBot(Robot robot, Screen[] screens) {
 		this.robot = robot;
@@ -226,6 +227,10 @@ public abstract class BaseBot {
 					ImageIO.read(new File("numbers/0.png")),ImageIO.read(new File("numbers/1.png")),ImageIO.read(new File("numbers/2.png"))
 					,ImageIO.read(new File("numbers/3.png")),ImageIO.read(new File("numbers/4.png")),ImageIO.read(new File("numbers/5.png")),
 					ImageIO.read(new File("numbers/6.png")),ImageIO.read(new File("numbers/7.png")),ImageIO.read(new File("numbers/8.png")),ImageIO.read(new File("numbers/9.png"))};
+			levelImages = new BufferedImage[]{
+					ImageIO.read(new File("numbers/lvl0.png")),ImageIO.read(new File("numbers/lvl1.png")),ImageIO.read(new File("numbers/lvl2.png"))
+					,ImageIO.read(new File("numbers/lvl3.png")),ImageIO.read(new File("numbers/lvl4.png")),ImageIO.read(new File("numbers/lvl5.png")),
+					ImageIO.read(new File("numbers/lvl6.png")),ImageIO.read(new File("numbers/lvl7.png")),ImageIO.read(new File("numbers/lvl8.png")),ImageIO.read(new File("numbers/lvl9.png"))};
 			botOutput("Loaded numbers.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -413,6 +418,93 @@ public abstract class BaseBot {
 		//starts at 353 739
 		return mp;
 	}
+	public int getLevel() throws IOException {
+		int level = 0;
+		Rectangle LevelRect = new Rectangle(38,744, 34, 13);
+		LevelRect = adjustRectangle(mapleScreen, LevelRect);
+		ArrayList<Integer> findLevelNums = findNums(LevelRect);
+		for(int x=0;x<findLevelNums.size();x++) {
+			level = (int) (level + findLevelNums.get(x)*Math.pow(10, findLevelNums.size()-x-1));
+		}
+		return level;
+	}
+	public ArrayList<Integer> findLevelNums(Rectangle rect) throws IOException {
+		BufferedImage image = robot.createScreenCapture(rect);
+		boolean imageMatched = true;
+		boolean addNum = false;
+		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
+		int currNumX = 0;
+		int numToAdd = 0;
+		
+		for(int x=0;x<image.getWidth();x++) {
+			for(int y=0;y<image.getHeight();y++) {
+				//find first num
+				for(int i=0;i<levelImages.length;i++) {
+					imageMatched = true;
+					for(int x2=0;x2<levelImages[i].getWidth();x2++) {
+						for(int y2=0;y2<levelImages[i].getHeight();y2++) {
+							Color pic1 = new Color(levelImages[i].getRGB(x2, y2));
+							if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
+								if(levelImages[i].getRGB(x2, y2) != image.getRGB(x+x2, y+y2)) {
+									imageMatched = false;
+									break;
+								}
+							}
+						}
+						if(!imageMatched) {
+							break;
+						}
+					}
+					if(imageMatched) {
+						numToAdd = i;
+						addNum = true;
+					}
+				}
+				//find first num
+				if(addNum) {
+					numbersFound.add(numToAdd);
+					addNum=false;
+					currNumX = x + 12;
+					break;
+				}
+			}
+			if(addNum) {
+				break;
+			}
+		}
+		for(int k=0;k<2;k++) {
+			numToAdd = 0;
+			for(int i=0;i<levelImages.length;i++) {
+				imageMatched = true;
+				for(int x2=0;x2<levelImages[i].getWidth();x2++) {
+					for(int y2=0;y2<levelImages[i].getHeight();y2++) {
+						Color pic1 = new Color(levelImages[i].getRGB(x2, y2));
+						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
+							if(levelImages[i].getRGB(x2, y2) != image.getRGB(currNumX+x2, y2)) {
+								imageMatched = false;
+								break;
+							}
+						}
+					}
+					if(!imageMatched) {
+						break;
+					}
+				}
+				if(imageMatched) {
+					numToAdd = i;
+					addNum = true;
+				}
+			}
+			if(addNum) {
+				numbersFound.add(numToAdd);
+				addNum=false;
+			}else {
+				break;
+			}
+			currNumX = currNumX + 6;
+		}
+		return numbersFound;
+	}
 	public ArrayList<Integer> findNums(Rectangle rect) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
 		boolean imageMatched = true;
@@ -451,8 +543,6 @@ public abstract class BaseBot {
 			}
 			currNumX = currNumX + 6;
 		}
-//		File outputfile = new File("numFind.png");
-//	    ImageIO.write(image, "png", outputfile);
 		return numbersFound;
 	}
 	public void checkPots() throws IOException {
