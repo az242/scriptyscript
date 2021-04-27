@@ -206,6 +206,7 @@ public abstract class BaseBot {
 		botOutput("Initializing bot with " + screens.length + " screens.");
 		try {
 			mapleScreen = getMapleScreen();
+			botOutput("Found Maple screen");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -225,6 +226,7 @@ public abstract class BaseBot {
 					ImageIO.read(new File("numbers/0.png")),ImageIO.read(new File("numbers/1.png")),ImageIO.read(new File("numbers/2.png"))
 					,ImageIO.read(new File("numbers/3.png")),ImageIO.read(new File("numbers/4.png")),ImageIO.read(new File("numbers/5.png")),
 					ImageIO.read(new File("numbers/6.png")),ImageIO.read(new File("numbers/7.png")),ImageIO.read(new File("numbers/8.png")),ImageIO.read(new File("numbers/9.png"))};
+			botOutput("Loaded numbers.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -388,28 +390,19 @@ public abstract class BaseBot {
 	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
 	}
+	public int getHp() throws IOException {
+		int hp = 0;
+		Rectangle hpRect = new Rectangle(241,739,35,7);
+		ArrayList<Integer> numbersFound = findNums(hpRect);
+		for(int x=0;x<numbersFound.size();x++) {
+			hp = hp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
+		}
+		return hp;
+	}
 	public int getMp() throws IOException {
-		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
-		boolean foundNumber = false;
 		int mp = 0;
-//		Zone nextNumZone = new Zone(new MaplePoint(347,739),new MaplePoint(351,745));
-		Rectangle nextNum = new Rectangle(347,739,5,7);
-		nextNum = adjustRectangle(mapleScreen,nextNum);
-		do {
-			foundNumber = false;
-			nextNum.setLocation((int) (nextNum.getX()+6), (int) nextNum.getY());
-			int numToAdd = 0;
-			for(int x=0;x<numImages.length;x++) {
-//				System.out.println("checking " + x);
-				if(findNum(nextNum,numImages[x])) {
-					numToAdd = x;
-					foundNumber = true;
-				}
-			}
-			if(foundNumber) {
-				numbersFound.add(numToAdd);
-			}
-		}while(foundNumber);
+		Rectangle MPRect = new Rectangle(353,739,35,7);
+		ArrayList<Integer> numbersFound = findNums(MPRect);
 		for(int x=0;x<numbersFound.size();x++) {
 			mp = (int) (mp + numbersFound.get(x)*Math.pow(10, numbersFound.size()-x-1));
 		}
@@ -418,52 +411,42 @@ public abstract class BaseBot {
 		//starts at 353 739
 		return mp;
 	}
-	public int getHp() throws IOException {
-		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
-		boolean foundNumber = false;
-		int hp = 0;
-		Rectangle nextNum = new Rectangle(234,739,5,7);
-		do {
-			foundNumber = false;
-			nextNum.setLocation((int) (nextNum.getX()+6), 739);
-			for(int x=0;x<numImages.length;x++) {
-				if(findNum(nextNum,numImages[x])) {
-					numbersFound.add(x);
-					foundNumber = true;
-				}
-			}
-		}while(foundNumber);
-		for(int x=0;x<numbersFound.size();x++) {
-			hp = hp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
-		}
-		return hp;
-	}
-	public boolean findNum(Rectangle rect, BufferedImage imageRecog) throws IOException {
+	public ArrayList<Integer> findNums(Rectangle rect) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
-		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth()+1;x1++) {
-			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight()+1;y1++) {
-				boolean matches = true;
-				for(int x2=0;x2<imageRecog.getWidth();x2++) {
-					for(int y2=0;y2<imageRecog.getHeight();y2++) {
-						Color pic1 = new Color(imageRecog.getRGB(x2, y2));
+		boolean imageMatched = true;
+		boolean addNum = false;
+		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
+		int[] numPoint = new int[] {rect.x,rect.y};
+		int numToAdd = 0;
+		for(int k=0;k<5;k++) {
+			for(int i=0;i<numImages.length;i++) {
+				for(int x2=0;x2<numImages[i].getWidth();x2++) {
+					for(int y2=0;y2<numImages[i].getHeight();y2++) {
+						Color pic1 = new Color(numImages[i].getRGB(x2, y2));
 						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
-							if(imageRecog.getRGB(x2, y2) != image.getRGB(x1+x2, y1+y2)) {
-								matches = false;
+							if(numImages[i].getRGB(x2, y2) != image.getRGB(numPoint[0]+x2, numPoint[1]+y2)) {
+								imageMatched = false;
+								break;
 							}
 						}
 					}
+					if(!imageMatched) {
+						break;
+					}
 				}
-				if(matches) {
-//					File outputfile = new File("numFind.png");
-//				    ImageIO.write(image, "png", outputfile);
-//					System.out.println(x1 + ", " + y1);
-					return true;
+				if(imageMatched) {
+					numToAdd = i;
+					addNum = true;
 				}
 			}
+			if(addNum) {
+				numbersFound.add(numToAdd);
+				numPoint[0] =+ 6;
+			}else {
+				break;
+			}
 		}
-		File outputfile = new File("numFind.png");
-	    ImageIO.write(image, "png", outputfile);
-		return false;
+		return numbersFound;
 	}
 	public void checkPots() throws IOException {
 		MaplePoint insertFound = getCurrPosition(insert,"potions/0unagi.png");
