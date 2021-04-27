@@ -393,6 +393,7 @@ public abstract class BaseBot {
 	public int getHp() throws IOException {
 		int hp = 0;
 		Rectangle hpRect = new Rectangle(241,739,35,7);
+		hpRect = adjustRectangle(mapleScreen, hpRect);
 		ArrayList<Integer> numbersFound = findNums(hpRect);
 		for(int x=0;x<numbersFound.size();x++) {
 			hp = hp + numbersFound.get(x)*10^(numbersFound.size()-x-1);
@@ -402,6 +403,7 @@ public abstract class BaseBot {
 	public int getMp() throws IOException {
 		int mp = 0;
 		Rectangle MPRect = new Rectangle(353,739,35,7);
+		MPRect = adjustRectangle(mapleScreen, MPRect);
 		ArrayList<Integer> numbersFound = findNums(MPRect);
 		for(int x=0;x<numbersFound.size();x++) {
 			mp = (int) (mp + numbersFound.get(x)*Math.pow(10, numbersFound.size()-x-1));
@@ -416,15 +418,17 @@ public abstract class BaseBot {
 		boolean imageMatched = true;
 		boolean addNum = false;
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
-		int[] numPoint = new int[] {rect.x,rect.y};
+		int currNumX = 0;
 		int numToAdd = 0;
 		for(int k=0;k<5;k++) {
+			numToAdd = 0;
 			for(int i=0;i<numImages.length;i++) {
+				imageMatched = true;
 				for(int x2=0;x2<numImages[i].getWidth();x2++) {
 					for(int y2=0;y2<numImages[i].getHeight();y2++) {
 						Color pic1 = new Color(numImages[i].getRGB(x2, y2));
 						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
-							if(numImages[i].getRGB(x2, y2) != image.getRGB(numPoint[0]+x2, numPoint[1]+y2)) {
+							if(numImages[i].getRGB(x2, y2) != image.getRGB(currNumX+x2, y2)) {
 								imageMatched = false;
 								break;
 							}
@@ -441,11 +445,14 @@ public abstract class BaseBot {
 			}
 			if(addNum) {
 				numbersFound.add(numToAdd);
-				numPoint[0] =+ 6;
+				addNum=false;
 			}else {
 				break;
 			}
+			currNumX = currNumX + 6;
 		}
+//		File outputfile = new File("numFind.png");
+//	    ImageIO.write(image, "png", outputfile);
 		return numbersFound;
 	}
 	public void checkPots() throws IOException {
@@ -606,10 +613,11 @@ public abstract class BaseBot {
 		for(int x=0;x<numAttacks;x++) {
 			waitOnChat();
 			robot.keyPress(key);
+			robot.delay(200);
 			int newMp = getMp();
 			while(Math.abs(originalMp-newMp) < mpCost) {
 				robot.keyPress(key);
-				robot.delay(25);
+				robot.delay(200);
 				botOutput("Failed to attack... retrying");
 				newMp = getMp();
 			}

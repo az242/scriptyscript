@@ -16,7 +16,7 @@ public class runner {
 			bot.enableSkill("Invincible");
 			bot.enableSkill("Magic Gaurd");
 			bot.enableSkill("Maple Warrior");
-			bot.enableSkill("Hyperbody");
+//			bot.enableSkill("Hyperbody");
 //			bot.enableSkill("Hermit");
 			bot.leech(3, bot.getMap("Wolf Spiders"));
 //			bot.swapMapleScreen(bot.getScreen("bishop"));
