@@ -160,17 +160,11 @@ public class Singapore extends BaseBot{
 	}
 	public void attackheal() throws IOException {
 		waitOnChat();
-		robot.keyPress(KeyEvent.VK_C);
-		robot.delay(2750);
-		robot.keyRelease(KeyEvent.VK_C);
+		attack(1, KeyEvent.VK_C, 2750, 3000);
 		waitOnChat();
-		robot.keyPress(KeyEvent.VK_V);
-		robot.delay(620);
-		robot.keyRelease(KeyEvent.VK_V);
+		attack(1,KeyEvent.VK_V, 615);
 		waitOnChat();
-		robot.keyPress(KeyEvent.VK_C);
-		robot.delay(2750);
-		robot.keyRelease(KeyEvent.VK_C);
+		attack(1, KeyEvent.VK_C, 2750, 3000);
 	}
 	public int GS2Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(50,45));
