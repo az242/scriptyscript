@@ -21,7 +21,6 @@ public class Victoria extends BaseBot{
 	}
 	
 	public void leech(int hours, MinimapData map) throws IOException {
-		swapMapleScreen(getScreen("bishop"));
 		MaplePoint cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
 		System.out.println("Starting leech script");

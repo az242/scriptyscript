@@ -15,7 +15,6 @@ public class NLC extends BaseBot{
 		adjustMinimapData(mapleScreen);
 	}
 	public void leech(int hours, MinimapData map) throws IOException {
-		swapMapleScreen(getScreen("bishop"));
 		MaplePoint cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
 		System.out.println("Starting leech script");

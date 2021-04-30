@@ -194,8 +194,9 @@ public abstract class BaseBot {
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop"),
 			new BuffData("Magic Gaurd", 530, KeyEvent.VK_R,700,"bishop"),
-			new BuffData("Maple Warrior", 270, KeyEvent.VK_D,1600,"bishop")
+			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop")
 	};
+	int startingLevel;
 	long[] buffTimers = new long[buffs.length];
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
@@ -236,6 +237,7 @@ public abstract class BaseBot {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 	public void enableSkill(String skillName) {
 		for(int x=0;x<buffs.length;x++) {
@@ -278,9 +280,9 @@ public abstract class BaseBot {
 		}
 	}
 	public void initScreens() throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(300,1050,200,30), "mapleTaskIcon.png");
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1050;
-		upperLeft.x = upperLeft.x + 300;
+		upperLeft.x = upperLeft.x + 100;
 //		outputCoords(upperLeft); 
 		int width = this.screens.length*165;
 		//85 735 60 24
@@ -328,18 +330,15 @@ public abstract class BaseBot {
 		}
 	}
 	public void swapMapleScreen(Screen screen) throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(300,1050,200,30), "mapleTaskIcon.png");
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1050;
-		upperLeft.x = upperLeft.x + 300;
+		upperLeft.x = upperLeft.x + 100;
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
 		click(upperLeft);
 		robot.delay(400);
-		clickZone = new Rectangle(upperLeft.x-(width/2) + 
-				(165*screen.index) ,
-				upperLeft.y-165,width 
-				- (165*screen.index),165);
+		clickZone = new Rectangle(upperLeft.x-(width/2) + (165*screen.index) ,upperLeft.y-165,width - (165*screen.index),165);
 		MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
 		//find icon
 		if(foundIcon.x > 0) {
@@ -420,9 +419,9 @@ public abstract class BaseBot {
 	}
 	public int getLevel() throws IOException {
 		int level = 0;
-		Rectangle LevelRect = new Rectangle(38,744, 34, 13);
+		Rectangle LevelRect = new Rectangle(38,744, 35, 13);
 		LevelRect = adjustRectangle(mapleScreen, LevelRect);
-		ArrayList<Integer> findLevelNums = findNums(LevelRect);
+		ArrayList<Integer> findLevelNums = findLevelNums(LevelRect);
 		for(int x=0;x<findLevelNums.size();x++) {
 			level = (int) (level + findLevelNums.get(x)*Math.pow(10, findLevelNums.size()-x-1));
 		}
@@ -435,10 +434,10 @@ public abstract class BaseBot {
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
 		int currNumX = 0;
 		int numToAdd = 0;
-		
-		for(int x=0;x<image.getWidth();x++) {
-			for(int y=0;y<image.getHeight();y++) {
-				//find first num
+		File outputfile = new File("numFind.png");
+	    ImageIO.write(image, "png", outputfile);
+		for(int x=0;x<image.getWidth()-10;x++) {
+			for(int y=0;y<image.getHeight()-12;y++) {
 				for(int i=0;i<levelImages.length;i++) {
 					imageMatched = true;
 					for(int x2=0;x2<levelImages[i].getWidth();x2++) {
@@ -460,10 +459,8 @@ public abstract class BaseBot {
 						addNum = true;
 					}
 				}
-				//find first num
 				if(addNum) {
 					numbersFound.add(numToAdd);
-					addNum=false;
 					currNumX = x + 12;
 					break;
 				}
@@ -472,9 +469,10 @@ public abstract class BaseBot {
 				break;
 			}
 		}
+		addNum = false;
 		for(int k=0;k<2;k++) {
 			numToAdd = 0;
-			for(int i=0;i<levelImages.length;i++) {
+			for(int i=0;i<levelImages.length && currNumX + 11 < image.getWidth();i++) {
 				imageMatched = true;
 				for(int x2=0;x2<levelImages[i].getWidth();x2++) {
 					for(int y2=0;y2<levelImages[i].getHeight();y2++) {
@@ -501,7 +499,7 @@ public abstract class BaseBot {
 			}else {
 				break;
 			}
-			currNumX = currNumX + 6;
+			currNumX = currNumX + 12;
 		}
 		return numbersFound;
 	}
@@ -678,6 +676,7 @@ public abstract class BaseBot {
 				}
 				botOutput("Reapplying " + buffs[x].buffName);
 				buffTimers[x] = temptime;
+//				keyPress(KeyEvent.VK_PAGE_DOWN);
 				keyPress(buffs[x].buffKey);
 				robot.delay(buffs[x].delay);
 			}
@@ -799,6 +798,13 @@ public abstract class BaseBot {
 	}
 	public void exitScript() {
 		LocalTime now = LocalTime.now();
+		int level = 0;
+		try {
+			level = getLevel();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		botOutput("Starting level: " + startingLevel + ", Ending Level: " + level);
 		botOutput("Script ran for " + MINUTES.between(startTime, now) + " minutes");
 		botOutput("Exiting script...");
 		System.exit(0);

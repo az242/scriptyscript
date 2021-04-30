@@ -19,6 +19,7 @@ public class Singapore extends BaseBot{
 	Zone midFloor = new Zone(new MaplePoint(2,37),new MaplePoint(140,54));
 	Zone botFloor = new Zone(new MaplePoint(2,58),new MaplePoint(140,75));
 	MinimapData cd = new MinimapData("cds", new Rectangle(33,72,141,80), new Rectangle(47,45,115,15),"minimapNames/cdName.png");
+	MinimapData cddungeon = new MinimapData("cdsdungeon", new Rectangle(64,72,141,80), new Rectangle(47,45,115,15),"minimapNames/cdName.png");
 	
 	long dropTimer = 0;
 	public Singapore(Robot robot, Screen[] screens) {
@@ -28,12 +29,12 @@ public class Singapore extends BaseBot{
 		minimapDatas.add(gs1);
 		minimapDatas.add(ulu2);
 		minimapDatas.add(cd);
+		minimapDatas.add(cddungeon);
 		adjustMinimapData(mapleScreen);
 	}
 
 	@Override
 	public void leech(int hours, MinimapData map) throws IOException {
-		swapMapleScreen(getScreen("bishop"));
 		MaplePoint cords = getMinimapPosition(map);
 		System.out.println("<--------------->");
 		System.out.println("Starting leech script");
@@ -49,9 +50,7 @@ public class Singapore extends BaseBot{
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
 			robot.delay(400);
-			attackheal();
-//			attack(1, KeyEvent.VK_C, 2750);
-//			attack(1, KeyEvent.VK_V, 620);
+			attack(map);
 			feedPets();
 			currTime = System.currentTimeMillis();
 			LocalTime now = LocalTime.now();
@@ -62,13 +61,31 @@ public class Singapore extends BaseBot{
 		}
 		exitScript();
 	}
+	public void attack(MinimapData map) throws IOException {
+		switch(map.name) {
+		case "ulu2":
+			attackheal();
+			break;
+		case "gs2":
+		case "gs2dungeon":
+			attack(1, KeyEvent.VK_C, 2750, 3000);
+			attack(1, KeyEvent.VK_V, 615);
+			break;
+		case "cds":
+		case "cdsdungeon":
+			attackheal();
+			break;
+		}
+	}
 	public int movement(int position, MinimapData map) throws IOException {
 		switch(map.name) {
 		case "ulu2":
 			return ulu2(position, map);
 		case "gs2":
+		case "gs2dungeon":
 			return GS2Movement(position, map);
 		case "cds":
+		case "cdsdungeon":
 			return cdMovement(position, map);
 		}
 		return 0;
@@ -167,10 +184,10 @@ public class Singapore extends BaseBot{
 		attack(1, KeyEvent.VK_C, 2750, 3000);
 	}
 	public int GS2Movement(int position, MinimapData map) throws IOException {
-		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(50,45));
+		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(46,45));
 		Zone rightSide = new Zone(new MaplePoint(80,23),new MaplePoint(92,45));
 		long currTime = System.currentTimeMillis();
-		if(currTime > dropTimer + 180*1000 && position == 1) {
+		if(currTime > dropTimer + 120*1000 && position == 1) {
 			dropTimer = currTime;
 			swapPlatforms(map);
 			moveToZoneX(leftSide, map);
