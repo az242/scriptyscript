@@ -49,10 +49,13 @@ public class Singapore extends BaseBot{
 		int minutes = 0;
 		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			checkPots();
-			if(sweeperTimer + 30*1000 > currTime) {
-				swapMapleScreen(getScreen(""));
+			if(getScreen("sweeper")!= null && sweeperTimer + 30*1000 > currTime) {
+				String temp = new String(currScreen);
+				swapMapleScreen(getScreen("sweeper"));
+				robot.delay(100);
 				sweeperTimer = currTime;
 				lootPosition = ulu2Sweeper(lootPosition, map);
+				swapMapleScreen(getScreen(temp));
 			}
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
