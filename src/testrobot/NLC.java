@@ -38,14 +38,14 @@ public class NLC extends BaseBot{
 		MaplePoint coords = getMinimapPosition(map);
 		Zone botTeleRight = new Zone(new MaplePoint(116,108), new MaplePoint(117,113));
 		Zone midTeleRight = new Zone(new MaplePoint(148,88), new MaplePoint(148,94));
-		Zone midTeleCheckRight = new Zone(new MaplePoint(144,86), new MaplePoint(152,100));
+		Zone midTeleCheckRight = new Zone(new MaplePoint(141,84), new MaplePoint(156,100));
 		Zone topTeleRight = new Zone(new MaplePoint(183,48), new MaplePoint(193,55));
 		
 		Zone middleAttack = new Zone(new MaplePoint(97,104), new MaplePoint(104,118));
 		
 		Zone botTeleLeft = new Zone(new MaplePoint(82,109), new MaplePoint(83,115));
 		Zone midTeleLeft = new Zone(new MaplePoint(48,87), new MaplePoint(48,91));
-		Zone midTeleCheckLeft = new Zone(new MaplePoint(46,85), new MaplePoint(55,93)); 
+		Zone midTeleCheckLeft = new Zone(new MaplePoint(46,85), new MaplePoint(58,96)); 
 		Zone topTeleLeft = new Zone(new MaplePoint(8,48), new MaplePoint(22,58));
 		switch(position) {
 		case 0:
@@ -94,8 +94,8 @@ public class NLC extends BaseBot{
 			}
 			return position + 1;
 		case 8:
-			Zone attackTopLeft2 = new Zone(new MaplePoint(73,76), new MaplePoint(80,81));
-			while(!attackTopLeft2.isInZone(coords)) {
+			Zone attackTopLeft2 = new Zone(new MaplePoint(73,76), new MaplePoint(78,81));
+			while(!attackTopLeft2.isInXZone(coords)) {
 				moveToZoneX(attackTopLeft2, map);
 				coords = getMinimapPosition(map);
 			}

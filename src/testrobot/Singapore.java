@@ -83,7 +83,7 @@ public class Singapore extends BaseBot{
 			return ulu2(position, map);
 		case "gs2":
 		case "gs2dungeon":
-			return GS2Movement(position, map);
+			return GS6Movement(position, map);
 		case "cds":
 		case "cdsdungeon":
 			return cdMovement(position, map);
@@ -206,6 +206,30 @@ public class Singapore extends BaseBot{
 			return 0;
 		}
 	}
+	
+	public int GS6Movement(int position, MinimapData map) throws IOException {
+		Zone leftSide = new Zone(new MaplePoint(32,2),new MaplePoint(38,45));
+		Zone rightSide = new Zone(new MaplePoint(85,2),new MaplePoint(90,45));
+//		long currTime = System.currentTimeMillis();
+//		if(currTime > dropTimer + 120*1000 && position == 1) {
+//			dropTimer = currTime;
+//			swapPlatforms2(map);
+//			moveToZoneX(leftSide, map);
+//		}
+		MaplePoint currPos = getMinimapPosition(map);
+		if(position == 0) {
+			moveToZoneX(leftSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			return 1;
+		} else{
+			moveToZoneX(rightSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			rebuff(.8);
+			return 0;
+		}
+	}
 	public void HolySymbol() {
 		long temptime = System.currentTimeMillis();
 		if(temptime >= buffTimers[0] + buffs[0].buffLength*1000) {
@@ -213,6 +237,50 @@ public class Singapore extends BaseBot{
 			buffTimers[0] = temptime;
 			keyPress(buffs[0].buffKey);
 			robot.delay(randomNum(1750,2500));
+		}
+	}
+	public void swapPlatforms2(MinimapData map) throws IOException {
+		Zone dropdownZone = new Zone(new MaplePoint(32,22),new MaplePoint(39,32)); //dropdown
+		Zone teleUpZone = new Zone(new MaplePoint(96,38),new MaplePoint(100,45)); //teleup
+		
+		Zone droppedZone = new Zone(new MaplePoint(32,38),new MaplePoint(39,45)); //dropdown
+		Zone teledZone = new Zone(new MaplePoint(96,22),new MaplePoint(100,32)); //teleup
+		MaplePoint startCoords = getMinimapPosition(map);
+		if(dropdownZone.isInYZone(startCoords)) {
+			MaplePoint currentCoords = getMinimapPosition(map);
+			int retries = 0;
+			while(!droppedZone.isInYZone(currentCoords) && retries < 10){
+				botOutput("Trying to drop down...");
+				waitOnChat();
+				moveToZoneX(dropdownZone,map);
+				jumpDown();
+				currentCoords = getMinimapPosition(map);
+				retries++;
+			}
+			if(retries == 10) {
+				botOutput("Failed to drop. Exiting...");
+				exitScript();
+			} else {
+				botOutput("Move from " + startCoords.toString() + " to " + currentCoords.toString());
+			}
+		}else if(teleUpZone.isInYZone(startCoords)){
+			MaplePoint currentCoords = getMinimapPosition(map);
+			int retries = 0;
+			while(!teledZone.isInYZone(currentCoords) && retries < 15){
+				botOutput("Trying to tele up...");
+				waitOnChat();
+				moveToZoneX(teleUpZone,map);
+				teleportUp();
+				teleportUp();
+				currentCoords = getMinimapPosition(map);
+				retries++;
+			}
+			if(retries == 15) {
+				botOutput("Failed to teleport up. Exiting...");
+				exitScript();
+			} else {
+				botOutput("Move from " + startCoords.toString() + " to " + currentCoords.toString());
+			}
 		}
 	}
 	public void swapPlatforms(MinimapData map) throws IOException {
