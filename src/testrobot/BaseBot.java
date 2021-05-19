@@ -280,10 +280,14 @@ public abstract class BaseBot {
 		}
 	}
 	public void initScreens() throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1400,800,40), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1050;
 		upperLeft.x = upperLeft.x + 100;
 //		outputCoords(upperLeft); 
+		if(this.screens.length == 1) {
+			click(300,100);
+			return;
+		}
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
@@ -330,6 +334,10 @@ public abstract class BaseBot {
 		}
 	}
 	public void swapMapleScreen(Screen screen) throws IOException {
+		if(this.screens.length == 1) {
+			click(300,100);
+			return;
+		}
 		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1050;
 		upperLeft.x = upperLeft.x + 100;
