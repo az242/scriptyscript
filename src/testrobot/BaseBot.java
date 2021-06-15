@@ -87,6 +87,10 @@ class Zone {
 		this.lowerRightBound = lowerRightBound;
 		this.ignoreY = false;
 	}
+	public Zone(int upper, int left, int lower, int right) {
+		this.upperLeftBound = new MaplePoint(upper,left);
+		this.lowerRightBound = new MaplePoint(lower,right);
+	}
 	public int getLeftBound(){
 		return upperLeftBound.x;
 	}
@@ -188,13 +192,17 @@ public abstract class BaseBot {
 	BuffData[] buffs = {
 			new BuffData("Haste", 200, KeyEvent.VK_R,700, "hermit"),
 			new BuffData("Mesos Up", 120, KeyEvent.VK_T,1000, "hermit"),
+			new BuffData("Hermit Pot", 3000, KeyEvent.VK_PAGE_DOWN,100, "hermit"),
 			new BuffData("Hermit", 120, KeyEvent.VK_U,100, "hermit"),
+			
 			new BuffData("Hyperbody", 155, KeyEvent.VK_R, 100, "spearman"),
+			new BuffData("Spearman Pot", 1200, KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
 			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop"),
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop"),
 			new BuffData("Magic Gaurd", 530, KeyEvent.VK_R,700,"bishop"),
-			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop")
+			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop"),
+			new BuffData("Magic", 550, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	int startingLevel;
 	long[] buffTimers = new long[buffs.length];
@@ -289,7 +297,7 @@ public abstract class BaseBot {
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
 		for(int x=0;x<this.screens.length;x++) {
 			click(upperLeft);
-			robot.delay(1000);
+			robot.delay(500);
 			clickZone = new Rectangle(upperLeft.x-(width/2) + (165*x) ,upperLeft.y-165,width - (165*x),165);
 			MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
 			//find icon
@@ -558,12 +566,12 @@ public abstract class BaseBot {
 			robot.keyPress(KeyEvent.VK_RIGHT);
 			while(tempCoords.x < zone.getLeftBound()) {
 				if(tempCoords.x + 11 < zone.getRightBound()){
-					robot.delay(75);
+					robot.delay(35);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);
 					robot.keyRelease(KeyEvent.VK_ALT);
 				} else {
-					robot.delay(75);
+					robot.delay(35);
 				}
 				tempCoords = getMinimapPosition(map);
 			}
@@ -572,16 +580,29 @@ public abstract class BaseBot {
 			robot.keyPress(KeyEvent.VK_LEFT);
 			while(tempCoords.x > zone.getRightBound()) {
 				if(tempCoords.x - 11 > zone.getLeftBound()){
-					robot.delay(75);
+					robot.delay(35);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);
 					robot.keyRelease(KeyEvent.VK_ALT);
 				} else {
-					robot.delay(75);
+					robot.delay(35);
 				}
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_LEFT);
+		}
+	}
+	public void moveToPlatform(Zone zone, MinimapData map) throws IOException{
+		MaplePoint pos = getMinimapPosition(map);
+		while(!zone.isInYZone(pos) || !zone.isInXZone(pos)) {
+			moveToZoneX(zone, map);
+			pos = getMinimapPosition(map);
+			if(pos.y > zone.getBottomBound()) {
+				teleportUp();
+			} else if (pos.y < zone.getTopBound()){
+				jumpDown();
+			}
+			pos = getMinimapPosition(map);
 		}
 	}
 	public void usePortal(Zone portal, Zone checkZone, MinimapData map) throws IOException {
@@ -612,6 +633,44 @@ public abstract class BaseBot {
 		}
 		robot.delay(300);
 //		System.out.println("finished portal");
+	}
+	public void climbRope(Zone rope, Zone checkZone, MinimapData map) throws IOException {
+		Zone jumpZone = new Zone(new MaplePoint(rope.getLeftBound()-5, rope.getTopBound()),new MaplePoint(rope.getLeftBound()+5, rope.getBottomBound()));
+		MaplePoint pos = getMinimapPosition(map);
+		while(!checkZone.isInYZone(pos)) {
+			if(pos.y >= checkZone.getBottomBound()) {
+				moveToZoneX(jumpZone, map);
+				pos = getMinimapPosition(map);
+				if(pos.x > rope.getLeftBound()) {
+					robot.keyPress(KeyEvent.VK_LEFT);
+					robot.keyPress(KeyEvent.VK_UP);
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_SPACE);
+					robot.keyRelease(KeyEvent.VK_LEFT);
+					robot.keyRelease(KeyEvent.VK_SPACE);
+				} else if(pos.x < rope.getLeftBound()) {
+					robot.keyPress(KeyEvent.VK_RIGHT);
+					robot.keyPress(KeyEvent.VK_UP);
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_SPACE);
+					robot.keyRelease(KeyEvent.VK_RIGHT);
+					robot.keyRelease(KeyEvent.VK_SPACE);
+				} else {
+					robot.keyPress(KeyEvent.VK_SPACE);
+					robot.delay(50);
+					robot.keyRelease(KeyEvent.VK_SPACE);
+					robot.keyPress(KeyEvent.VK_UP);
+				}
+			} else {
+				moveToZoneX(rope, map);
+				robot.keyPress(KeyEvent.VK_DOWN);
+				robot.delay(200);
+				robot.keyRelease(KeyEvent.VK_DOWN);
+			}
+			pos = getMinimapPosition(map);
+			robot.delay(100);
+		}
+		robot.keyRelease(KeyEvent.VK_UP);
 	}
 	public void waitOnChat() throws IOException {
 		boolean chatOpen = true;
@@ -768,6 +827,7 @@ public abstract class BaseBot {
 		robot.delay(200);
 		robot.keyRelease(KeyEvent.VK_RIGHT);
 		robot.keyRelease(KeyEvent.VK_ALT);
+		robot.delay(400);
 	}
 	public void teleportLeft() {
 		robot.keyPress(KeyEvent.VK_LEFT);
@@ -775,6 +835,7 @@ public abstract class BaseBot {
 		robot.delay(200);
 		robot.keyRelease(KeyEvent.VK_LEFT);
 		robot.keyRelease(KeyEvent.VK_ALT);
+		robot.delay(400);
 	}
 	public void teleportUp() {
 		robot.keyPress(KeyEvent.VK_UP);
@@ -782,7 +843,7 @@ public abstract class BaseBot {
 		robot.delay(200);
 		robot.keyRelease(KeyEvent.VK_UP);
 		robot.keyRelease(KeyEvent.VK_ALT);
-		robot.delay(400);
+		robot.delay(100);
 	}
 	public void jumpDown() {
 		robot.keyPress(KeyEvent.VK_DOWN);
@@ -797,6 +858,14 @@ public abstract class BaseBot {
 	    System.out.println("[" + myObj + "] " + output);
 	}
 	public void exitScript() {
+//		robot.delay(4000);
+//		keyPress(KeyEvent.VK_K);
+//		robot.delay(400);
+//		keyPress(KeyEvent.VK_UP);
+//		robot.delay(400);
+//		keyPress(KeyEvent.VK_UP);
+//		robot.delay(400);
+//		keyPress(KeyEvent.VK_UP);
 		LocalTime now = LocalTime.now();
 		int level = 0;
 		try {

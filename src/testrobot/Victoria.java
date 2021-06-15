@@ -10,13 +10,14 @@ public class Victoria extends BaseBot{
 	MinimapData ironboar = new MinimapData("Iron Boar", new Rectangle(6,72,154,79), new Rectangle(47,45,65,15),"minimapNames/ironboarName.png");
 	MinimapData bubbling = new MinimapData("Bubbling", new Rectangle(6,72,259,79), new Rectangle(47,45,85,15),"minimapNames/bubblingName.png");
 	MinimapData jrwraith = new MinimapData("jrwraith", new Rectangle(6,72,259,79), new Rectangle(47,45,85,15),"minimapNames/jrwraithName.png");
-	
+	MinimapData wraith = new MinimapData("wraith", new Rectangle(6,72,259,79), new Rectangle(47,45,85,15),"minimapNames/wraithName.png");
 	long dropTimer = 0;
 	public Victoria(Robot robot, Screen[] screens) {
 		super(robot, screens);
 		minimapDatas.add(ironboar);
 		minimapDatas.add(bubbling);
 		minimapDatas.add(jrwraith);
+		minimapDatas.add(wraith);
 		adjustMinimapData(mapleScreen);
 	}
 	
@@ -34,8 +35,8 @@ public class Victoria extends BaseBot{
 			checkPots();
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
-			robot.delay(400);
-			attack(1, KeyEvent.VK_C, 2750);
+			robot.delay(200);
+			attack(1, KeyEvent.VK_C, 2750, 3000);
 			feedPets();
 		}
 		exitScript();
@@ -48,6 +49,8 @@ public class Victoria extends BaseBot{
 			return bubblingMovement(position, map);
 		case "jrwraith":
 			return jrWraithMovement(position, map);
+		case "wraith":
+			return wraithMovement(position,map);
 		}
 		return 0;
 	}
@@ -100,6 +103,9 @@ public class Victoria extends BaseBot{
 					teleportUp();
 				pos = getMinimapPosition(map);
 			}
+			if(position == 8) {
+				return 0;
+			}
 			return position + 1;
 		case 7:
 		case 1:
@@ -141,8 +147,6 @@ public class Victoria extends BaseBot{
 				pos = getMinimapPosition(map);
 			}
 			return position + 1;
-		case 9:
-			return 0;
 		}
 		return 0;
 	}
@@ -152,62 +156,55 @@ public class Victoria extends BaseBot{
 		case 7:
 		case 0:
 			Zone att1 = new Zone(new MaplePoint(54,37), new MaplePoint(58,42));
-			while(!att1.isInZone(pos)) {
-				moveToZoneX(att1, map);
-				if(!att1.isInYZone(pos))
-					teleportUp();
-				pos = getMinimapPosition(map);
-			}
+			moveToPlatform(att1, map);
+			if(position == 7 ) 
+				return 0;
 			return position + 1;
 		case 6:
 		case 1:
-			Zone att2 = new Zone(new MaplePoint(109,43), new MaplePoint(114,48));
-			while(!att2.isInXZone(pos)) {
-				moveToZoneX(att2, map);
-//				if(!att2.isInYZone(pos[1])){
-//					if(pos[1] >= att2.getTopBound()) {
-//						teleportUp();
-//					} else {
-//						jumpDown();
-//					}
-//				}
-				rebuff(.75);
-				pos = getMinimapPosition(map);
-			}
+			Zone att2 = new Zone(new MaplePoint(112,37), new MaplePoint(114,42));
+			moveToPlatform(att2, map);
+			rebuff(.75);
 			return position + 1;
 		case 5:
 		case 2:
 			Zone att3 = new Zone(new MaplePoint(142,37), new MaplePoint(148,42));
-			while(!att3.isInXZone(pos)) {
-				moveToZoneX(att3, map);
-				if(!att3.isInYZone(pos)){
-					if(pos.y >= att3.getTopBound()) {
-						teleportUp();
-					} else {
-						jumpDown();
-					}
-				}
-					
-				pos = getMinimapPosition(map);
-			}
+			moveToPlatform(att3, map);
 			return position + 1;
 		case 4:
 		case 3:
 			Zone att4 = new Zone(new MaplePoint(200,37), new MaplePoint(206,42));
-			while(!att4.isInXZone(pos)) {
-				moveToZoneX(att4, map);
-				if(!att4.isInYZone(pos)){
-					if(pos.y >= att4.getTopBound()) {
-						teleportUp();
-					} else {
-						jumpDown();
-					}
-				}
-				pos = getMinimapPosition(map);
-			}
+			moveToPlatform(att4, map);
 			return position + 1;
-		case 8:
-			return 0;
+		}
+		return 0;
+	}
+	public int wraithMovement(int position, MinimapData map) throws IOException {
+		MaplePoint pos = getMinimapPosition(map);
+		switch(position){
+		case 7:
+		case 0:
+			Zone att1 = new Zone(new MaplePoint(68,41), new MaplePoint(69,44));
+			moveToPlatform(att1, map);
+			if(position == 7 ) 
+				return 0;
+ 			return position + 1;
+		case 6:
+		case 1:
+			Zone att2 = new Zone(new MaplePoint(110,39), new MaplePoint(113,44));
+			moveToPlatform(att2, map);
+			return position + 1;
+		case 5:
+		case 2:
+			Zone att3 = new Zone(new MaplePoint(136,39), new MaplePoint(137,44));
+			moveToPlatform(att3, map);
+			return position + 1;
+		case 4:
+		case 3:
+			Zone att4 = new Zone(new MaplePoint(181,38), new MaplePoint(185,44));
+			moveToPlatform(att4, map);
+			rebuff(.75);
+			return position + 1;
 		}
 		return 0;
 	}

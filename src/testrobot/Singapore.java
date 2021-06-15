@@ -14,6 +14,7 @@ public class Singapore extends BaseBot{
 	MinimapData gs1 = new MinimapData("gs1", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"minimapNames/gs1mapName.png");
 	
 	MinimapData ulu2 = new MinimapData("ulu2", new Rectangle(6,72,132,81), new Rectangle(47,45,70,15),"minimapNames/ulu2Mapname.png");
+	MinimapData ulu1 = new MinimapData("ulu1", new Rectangle(6,72,132,104), new Rectangle(47,45,70,15),"minimapNames/ulu2Mapname.png");
 	
 	Zone topFloor = new Zone(new MaplePoint(2,20),new MaplePoint(140,33));
 	Zone midFloor = new Zone(new MaplePoint(2,37),new MaplePoint(140,54));
@@ -28,6 +29,7 @@ public class Singapore extends BaseBot{
 		minimapDatas.add(gs2);
 		minimapDatas.add(gs1);
 		minimapDatas.add(ulu2);
+		minimapDatas.add(ulu1);
 		minimapDatas.add(cd);
 		minimapDatas.add(cddungeon);
 		adjustMinimapData(mapleScreen);
@@ -42,24 +44,24 @@ public class Singapore extends BaseBot{
 		botOutput("Starting at position: " + cords.toString());
 		int position = 0;
 		int lootPosition = 0;
-		
 		long currTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
 		rebuff(.75);
 		int minutes = 0;
 		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			checkPots();
-			if(getScreen("sweeper")!= null && sweeperTimer + 30*1000 > currTime) {
+			if(getScreen("sweeper")!= null && sweeperTimer + 33*1000 < currTime) {
 				String temp = new String(currScreen);
 				swapMapleScreen(getScreen("sweeper"));
 				robot.delay(100);
 				sweeperTimer = currTime;
 				lootPosition = ulu2Sweeper(lootPosition, map);
+				botOutput("Sweeper Moved to position index: " + lootPosition);
 				swapMapleScreen(getScreen(temp));
 			}
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
-			robot.delay(400);
+			robot.delay(200);
 			attack(map);
 			feedPets();
 			currTime = System.currentTimeMillis();
@@ -75,10 +77,14 @@ public class Singapore extends BaseBot{
 	public void attack(MinimapData map) throws IOException {
 		switch(map.name) {
 		case "ulu2":
-			attackheal();
+//			attackheal();
+			attack(1, KeyEvent.VK_C, 2750, 3000);
+			attack(1, KeyEvent.VK_V, 615);
 			break;
 		case "gs2":
+		case "gs1":
 		case "gs2dungeon":
+		case "ulu1":
 			attack(1, KeyEvent.VK_C, 2750, 3000);
 			attack(1, KeyEvent.VK_V, 615);
 			break;
@@ -92,12 +98,16 @@ public class Singapore extends BaseBot{
 		switch(map.name) {
 		case "ulu2":
 			return ulu2(position, map);
+		case "ulu1":
+			return ulu1(position, map);
 		case "gs2":
 		case "gs2dungeon":
-			return GS6Movement(position, map);
+			return GS2Movement(position, map);
 		case "cds":
 		case "cdsdungeon":
 			return cdMovement(position, map);
+		case "gs1":
+			return GS1Movement(position, map);
 		}
 		return 0;
 	}
@@ -105,13 +115,13 @@ public class Singapore extends BaseBot{
 	long sweeperTimer= 0;
 	public int ulu2Sweeper(int position, MinimapData map) throws IOException {
 		Zone rightRope = new Zone(new MaplePoint(93,46), new MaplePoint(93,57));
-		Zone leftRope = new Zone(new MaplePoint(39,46), new MaplePoint(39,57));
+		Zone leftRope = new Zone(new MaplePoint(38,46), new MaplePoint(39,57));
 		
-		Zone checkZone = new Zone(new MaplePoint(99,47), new MaplePoint(115,51));
+		Zone checkZone = new Zone(new MaplePoint(99,47), new MaplePoint(115,54));
 		
-		Zone spot1 = new Zone(new MaplePoint(36,37), new MaplePoint(40,43));
-		Zone spot2 = new Zone(new MaplePoint(59,37), new MaplePoint(65,40));
-		Zone spot3 = new Zone(new MaplePoint(81,37), new MaplePoint(86,43));
+		Zone spot1 = new Zone(new MaplePoint(36,37), new MaplePoint(40,41));
+		Zone spot2 = new Zone(new MaplePoint(58,37), new MaplePoint(64,40));
+		Zone spot3 = new Zone(new MaplePoint(81,37), new MaplePoint(86,41));
 		Zone spot4 = new Zone(new MaplePoint(96,37), new MaplePoint(103,40));
 		MaplePoint pos = getMinimapPosition(map);
 		switch(position) {
@@ -125,12 +135,15 @@ public class Singapore extends BaseBot{
 			}
 			return position + 1;
 		case 1:
+		case 7:
 			while(!spot2.isInXZone(pos)) {
 				moveToZoneX(spot2, map);
+				robot.delay(200);
 				keyPress(KeyEvent.VK_SPACE);
 				pos = getMinimapPosition(map);
 			}
 			return position + 1;
+		case 6:
 		case 2:
 			while(!spot3.isInXZone(pos)) {
 				moveToZoneX(spot3, map);
@@ -141,6 +154,7 @@ public class Singapore extends BaseBot{
 		case 3:
 			while(!spot4.isInXZone(pos)) {
 				moveToZoneX(spot4, map);
+				robot.delay(200);
 				keyPress(KeyEvent.VK_SPACE);
 				pos = getMinimapPosition(map);
 			}
@@ -148,18 +162,83 @@ public class Singapore extends BaseBot{
 		case 4:
 			//go down rope
 			climbRope(rightRope,checkZone, map);
+			robot.keyPress(KeyEvent.VK_C);
+			robot.delay(300);
+			robot.keyRelease(KeyEvent.VK_C);
+			robot.delay(300);
+			robot.keyPress(KeyEvent.VK_DELETE);
+			robot.delay(300);
+			robot.keyRelease(KeyEvent.VK_DELETE);
+			return 0;
+		case 5:
+			//go up rope
 			refreshHiddenSight();
+			climbRope(rightRope,spot1, map);
+			while(!spot4.isInXZone(pos)) {
+				moveToZoneX(spot4, map);
+				robot.delay(200);
+				keyPress(KeyEvent.VK_SPACE);
+				pos = getMinimapPosition(map);
+			}
+			return position + 1;
+		case 8:
+			while(!spot1.isInXZone(pos)) {
+				moveToZoneX(spot1, map);
+//				keyPress(KeyEvent.VK_SPACE);
+				pos = getMinimapPosition(map);
+			}
+			return position + 1;
+		case 9: 
+			//go down rope
+			climbRope(leftRope,checkZone, map);
+			robot.keyPress(KeyEvent.VK_C);
+			robot.delay(300);
+			robot.keyRelease(KeyEvent.VK_C);
 			return 0;
 		}
 		return 0;
 	}
 	public void refreshHiddenSight() {
 		robot.keyPress(KeyEvent.VK_C);
-		robot.delay(100);
+		robot.delay(300);
 		robot.keyRelease(KeyEvent.VK_C);
+		robot.delay(300);
 		robot.keyPress(KeyEvent.VK_V);
-		robot.delay(100);
+		robot.delay(300);
 		robot.keyRelease(KeyEvent.VK_V);
+	}
+	public int ulu1(int position, MinimapData map) throws IOException {
+		MaplePoint pos = getMinimapPosition(map);
+		switch(position) {
+		case 0:
+		case 5:
+			Zone att1 = new Zone(30,51,31,54);
+			while(!att1.isInZone(pos)) {
+				moveToPlatform(att1, map);
+				pos = getMinimapPosition(map);
+			}
+			rebuff(.7);
+			if(position == 5)
+				return 0;
+			return position + 1;
+		case 1:
+		case 4:
+			Zone att2 = new Zone(44,70,53,77);
+			while(!att2.isInZone(pos)) {
+				moveToPlatform(att2, map);
+				pos = getMinimapPosition(map);
+			}
+			return position + 1;
+		case 2:
+		case 3:
+			Zone att3 = new Zone(89,61,96,69);
+			while(!att3.isInXZone(pos)) {
+				moveToZoneX(att3, map);
+				pos = getMinimapPosition(map);
+			}
+			return position + 1;
+		}
+		return 0;
 	}
 	public int ulu2(int position, MinimapData map) throws IOException {
 		Zone attack1 = new Zone(new MaplePoint(33,27), new MaplePoint(40,66));
@@ -176,7 +255,7 @@ public class Singapore extends BaseBot{
 				moveToZoneX(attack1, map);
 				pos = getMinimapPosition(map);
 			}
-			rebuff(.6);
+			rebuff(.7);
 			while(pos.y < 58) {
 				jumpDown();
 				pos = getMinimapPosition(map);
@@ -217,45 +296,6 @@ public class Singapore extends BaseBot{
 		}
 		return 0;
 	}
-	
-	public void climbRope(Zone rope, Zone checkZone, MinimapData map) throws IOException {
-		Zone jumpZone = new Zone(new MaplePoint(rope.getLeftBound()-5, 55),new MaplePoint(rope.getLeftBound()+5, 65));
-		MaplePoint pos = getMinimapPosition(map);
-		while(!checkZone.isInYZone(pos)) {
-			if(pos.y >= checkZone.getBottomBound()) {
-				moveToZoneX(jumpZone, map);
-				pos = getMinimapPosition(map);
-				if(pos.x > rope.getLeftBound()) {
-					robot.keyPress(KeyEvent.VK_LEFT);
-					robot.delay(100);
-					robot.keyPress(KeyEvent.VK_SPACE);
-					robot.keyPress(KeyEvent.VK_UP);
-					robot.keyRelease(KeyEvent.VK_LEFT);
-					robot.keyRelease(KeyEvent.VK_SPACE);
-				} else if(pos.x < rope.getLeftBound()) {
-					robot.keyPress(KeyEvent.VK_RIGHT);
-					robot.delay(100);
-					robot.keyPress(KeyEvent.VK_SPACE);
-					robot.keyPress(KeyEvent.VK_UP);
-					robot.keyRelease(KeyEvent.VK_RIGHT);
-					robot.keyRelease(KeyEvent.VK_SPACE);
-				} else {
-					robot.keyPress(KeyEvent.VK_UP);
-				}
-			} else {
-				while(!checkZone.isInYZone(pos)) {
-					moveToZoneX(rope, map);
-					robot.keyPress(KeyEvent.VK_DOWN);
-					robot.delay(200);
-					pos = getMinimapPosition(map);
-				}
-				robot.keyRelease(KeyEvent.VK_DOWN);
-			}
-			pos = getMinimapPosition(map);
-			robot.delay(100);
-		}
-		robot.keyRelease(KeyEvent.VK_UP);
-	}
 	public void attackheal() throws IOException {
 		waitOnChat();
 		attack(1, KeyEvent.VK_C, 2750, 3000);
@@ -289,6 +329,29 @@ public class Singapore extends BaseBot{
 	}
 	
 	public int GS6Movement(int position, MinimapData map) throws IOException {
+		Zone leftSide = new Zone(new MaplePoint(32,2),new MaplePoint(38,45));
+		Zone rightSide = new Zone(new MaplePoint(85,2),new MaplePoint(90,45));
+//		long currTime = System.currentTimeMillis();
+//		if(currTime > dropTimer + 120*1000 && position == 1) {
+//			dropTimer = currTime;
+//			swapPlatforms2(map);
+//			moveToZoneX(leftSide, map);
+//		}
+		MaplePoint currPos = getMinimapPosition(map);
+		if(position == 0) {
+			moveToZoneX(leftSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			return 1;
+		} else{
+			moveToZoneX(rightSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			rebuff(.8);
+			return 0;
+		}
+	}
+	public int GS1Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(32,2),new MaplePoint(38,45));
 		Zone rightSide = new Zone(new MaplePoint(85,2),new MaplePoint(90,45));
 //		long currTime = System.currentTimeMillis();
