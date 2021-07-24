@@ -60,7 +60,8 @@ public class Singapore extends BaseBot{
 				swapMapleScreen(getScreen(temp));
 			}
 			position = movement(position, map);
-			botOutput("Moved to position index: " + position);
+			MaplePoint newCoords = getMinimapPosition(map);
+			botOutput("Moved to position index: " + newCoords.toString());
 			robot.delay(200);
 			attack(map);
 			feedPets();
@@ -85,7 +86,7 @@ public class Singapore extends BaseBot{
 		case "gs1":
 		case "gs2dungeon":
 		case "ulu1":
-			attack(1, KeyEvent.VK_C, 2750, 3000);
+			attack(1, KeyEvent.VK_C, 2750, 2000);
 			attack(1, KeyEvent.VK_V, 615);
 			break;
 		case "cds":
@@ -107,7 +108,7 @@ public class Singapore extends BaseBot{
 		case "cdsdungeon":
 			return cdMovement(position, map);
 		case "gs1":
-			return GS1Movement(position, map);
+			return GSSafeMovement(position, map);
 		}
 		return 0;
 	}
@@ -298,11 +299,11 @@ public class Singapore extends BaseBot{
 	}
 	public void attackheal() throws IOException {
 		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2750, 3000);
+		attack(1, KeyEvent.VK_C, 2750, 2000);
 		waitOnChat();
 		attack(1,KeyEvent.VK_V, 615);
 		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2750, 3000);
+		attack(1, KeyEvent.VK_C, 2750, 2000);
 	}
 	public int GS2Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(46,45));
@@ -373,6 +374,43 @@ public class Singapore extends BaseBot{
 			rebuff(.8);
 			return 0;
 		}
+	}
+	public int GSSafeMovement(int position, MinimapData map) throws IOException {
+		int leftBound = 96;
+		int rightBound = 101;
+		
+//		long currTime = System.currentTimeMillis();
+//		if(currTime > dropTimer + 120*1000 && position == 1) {
+//			dropTimer = currTime;
+//			swapPlatforms2(map);
+//			moveToZoneX(leftSide, map);
+//		}
+		MaplePoint currPos = getMinimapPosition(map);
+		MaplePoint currPos2= getMinimapPosition(map);
+		double rand = Math.random();
+		if(currPos.x >=39) {
+			rand = 0;
+		} else if(currPos.x <= 36) {
+			rand = 1;
+		}
+		if(rand > .5) {
+			//move right
+			robot.keyPress(KeyEvent.VK_RIGHT);
+			while(currPos2.x == currPos.x) {
+				robot.delay(30);
+				currPos2 = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_RIGHT);
+		} else {
+			//move left
+			robot.keyPress(KeyEvent.VK_LEFT);
+			while(currPos2.x == currPos.x) {
+				robot.delay(30);
+				currPos2 = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_LEFT);
+		}
+		return 0;
 	}
 	public void HolySymbol() {
 		long temptime = System.currentTimeMillis();

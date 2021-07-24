@@ -158,6 +158,7 @@ class BuffData {
 	String buffName;
 	String screen;
 	int delay;
+	String image;
 	boolean enabled = false;
 	public BuffData(String buffName, int buffLength, int buffKey, int buffDelay) {
 		this.buffKey = buffKey;
@@ -171,6 +172,14 @@ class BuffData {
 		this.buffName = buffName;
 		this.screen = screen;
 		this.delay = buffDelay;
+	}
+	public BuffData(String buffName, int buffLength, int buffKey, int buffDelay, String screen, String image) {
+		this.buffKey = buffKey;
+		this.buffLength = buffLength;
+		this.buffName = buffName;
+		this.screen = screen;
+		this.delay = buffDelay;
+		this.image = image;
 	}
 	public void enable(){
 		this.enabled = true;
@@ -187,6 +196,7 @@ public abstract class BaseBot {
 	Rectangle home;
 	Rectangle insert;
 	Rectangle pageUp;
+	Rectangle buffZone;
 	Screen[] screens;
 	String currScreen = "";
 	BuffData[] buffs = {
@@ -197,11 +207,11 @@ public abstract class BaseBot {
 			
 			new BuffData("Hyperbody", 155, KeyEvent.VK_R, 100, "spearman"),
 			new BuffData("Spearman Pot", 1200, KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
-			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop"),
-			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop"),
-			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop"),
-			new BuffData("Magic Gaurd", 530, KeyEvent.VK_R,700,"bishop"),
-			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop"),
+			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
+			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
+			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
+			new BuffData("Magic Gaurd", 530, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
+			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
 			new BuffData("Magic", 550, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	int startingLevel;
@@ -225,6 +235,7 @@ public abstract class BaseBot {
 		home= adjustRectangle(mapleScreen, new Rectangle(875, 723, 10, 12));
 		insert = adjustRectangle(mapleScreen, new Rectangle(840, 723, 10, 12));
 		pageUp = adjustRectangle(mapleScreen, new Rectangle(910, 723, 10, 12));
+		buffZone = adjustRectangle(mapleScreen, new Rectangle(990, 24, 30, 30));
 		try {
 			initScreens();
 		} catch (IOException e) {
@@ -288,9 +299,38 @@ public abstract class BaseBot {
 		}
 	}
 	public void initScreens() throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
-		upperLeft.y = upperLeft.y + 1050;
-		upperLeft.x = upperLeft.x + 100;
+		if(this.screens.length == 1){
+			botOutput("Found screen " + 0 + ". Verifying character...");
+			click(100,100);
+			robot.delay(500);
+			Rectangle nameSearch = new Rectangle(85,735, 65, 30);
+			nameSearch = adjustRectangle(this.mapleScreen, nameSearch);
+			boolean found = false;
+			for(int i=0;i<this.screens.length;i++) {
+				if(this.screens[i].index < 0 ) {
+//					botOutput("Checking if this screen is " + this.screens[i].name);
+					MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
+					if(foundName.x > 0) {
+						this.screens[i].index = 0;
+						found = true;
+						botOutput("Verified: " + this.screens[i].name + " on screen " + 0);
+						break;
+					}
+				}
+			}
+			if(!found) {
+				// exit warning theres a unrecognized character
+				BufferedImage bi = robot.createScreenCapture(nameSearch);  // retrieve image
+			    File outputfile = new File("nameTest.png");
+			    ImageIO.write(bi, "png", outputfile);
+				botOutput("Unrecognized character. Exiting...");
+				exitScript();
+			}
+			return;
+		}
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(900,1400,500,100), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1400;
+		upperLeft.x = upperLeft.x + 900;
 //		outputCoords(upperLeft); 
 		int width = this.screens.length*165;
 		//85 735 60 24
@@ -338,9 +378,16 @@ public abstract class BaseBot {
 		}
 	}
 	public void swapMapleScreen(Screen screen) throws IOException {
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(100,1050,500,30), "mapleTaskIcon.png");
-		upperLeft.y = upperLeft.y + 1050;
-		upperLeft.x = upperLeft.x + 100;
+		if(this.screens.length == 1){
+			botOutput("Swapped to screen " + screen.index);
+			click(100,100);
+			this.currScreen = screen.name;
+			robot.delay(200);
+			return;
+		}
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(900,1400,200,50), "mapleTaskIcon.png");
+		upperLeft.y = upperLeft.y + 1400;
+		upperLeft.x = upperLeft.x + 900;
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
@@ -349,7 +396,7 @@ public abstract class BaseBot {
 		clickZone = new Rectangle(upperLeft.x-(width/2) + (165*screen.index) ,upperLeft.y-165,width - (165*screen.index),165);
 		MaplePoint foundIcon = getCurrPosition(clickZone, "mapleTaskIconSmall.png");
 		//find icon
-		if(foundIcon.x > 0) {
+		if(foundIcon.x > 0 && this.screens.length > 1) {
 			foundIcon.x += clickZone.x;
 			foundIcon.y += clickZone.y;
 			botOutput("Swapped to screen " + screen.index);
@@ -391,15 +438,15 @@ public abstract class BaseBot {
 					}
 				}
 				if(matches) {
-					File outputfile = new File("couldFind.png");
-				    ImageIO.write(image, "png", outputfile);
+//					File outputfile = new File("couldFind.png");
+//				    ImageIO.write(image, "png", outputfile);
 //					System.out.println(x1 + ", " + y1);
 					return new MaplePoint(x1,y1);
 				}
 			}
 		}
-		File outputfile = new File("couldFind.png");
-	    ImageIO.write(image, "png", outputfile);
+//		File outputfile = new File("couldFind.png");
+//	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
 	}
 	public int getHp() throws IOException {
@@ -738,11 +785,52 @@ public abstract class BaseBot {
 //				keyPress(KeyEvent.VK_PAGE_DOWN);
 				keyPress(buffs[x].buffKey);
 				robot.delay(buffs[x].delay);
+				if(buffs[x].image != null) {
+					int max = 0;
+					MaplePoint foundBuff = findBuff(buffZone,buffs[x].image);
+					while(foundBuff.x == -1 && max<3) {
+						keyPress(buffs[x].buffKey);
+						robot.delay(buffs[x].delay);
+						botOutput("trying again: " + buffs[x].buffName);
+						foundBuff = findBuff(buffZone,buffs[x].image);
+						max++;
+					}
+				}
 			}
 		}
 		if(!oldScreen.equals(currScreen)) {
 			swapMapleScreen(getScreen(oldScreen));
 		}
+	}
+	public MaplePoint findBuff(Rectangle rect, String fileName) throws IOException {
+		BufferedImage imageRecog = ImageIO.read(new File(fileName));
+		BufferedImage image = robot.createScreenCapture(rect);
+		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth();x1++) {
+			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight();y1++) {
+				boolean matches = true;
+				for(int x2=0;x2<imageRecog.getWidth();x2++) {
+					for(int y2=0;y2<imageRecog.getHeight();y2++) {
+						Color pic1 = new Color(imageRecog.getRGB(x2, y2));
+						if(pic1.getRed() <= 30 && pic1.getBlue() <= 30 && pic1.getGreen() <= 30) {
+							Color pic2 = new Color(image.getRGB(x1+x2, y1+y2));
+							if(pic2.getRed() > 30 || pic2.getBlue() > 30 || pic2.getGreen() > 30) {
+								matches = false;
+								//botOutput("trying to check something black at image:" + x2 + ", "+y2+" and on screen at "+(x1+x2)+", "+(y1+y2));
+							}
+						}
+					}
+				}
+				if(matches) {
+//					File outputfile = new File("couldFindBuff.png");
+//				    ImageIO.write(image, "png", outputfile);
+//					System.out.println(x1 + ", " + y1);
+					return new MaplePoint(x1,y1);
+				}
+			}
+		}
+		File outputfile = new File("couldFindBuff.png");
+	    ImageIO.write(image, "png", outputfile);
+		return new MaplePoint(-1,-1);
 	}
 	public void attack(int numAttacks, int key, int delay) throws IOException {
 		botOutput("Attacking " + numAttacks + " times with " + delay + "ms Delay.");
@@ -752,6 +840,7 @@ public abstract class BaseBot {
 			robot.keyPress(key);
 			robot.keyPress(key);
 			robot.delay(delay + randomPosNeg(randomNum(1,10)));
+			rebuff(1);
 		}
 		robot.keyRelease(key);
 	}
@@ -761,12 +850,12 @@ public abstract class BaseBot {
 		for(int x=0;x<numAttacks;x++) {
 			waitOnChat();
 			robot.keyPress(key);
-			robot.delay(200);
+			robot.delay(300);
 			int newMp = getMp();
 			while(Math.abs(originalMp-newMp) < mpCost) {
+				botOutput("Failed to attack... retrying origMP:" + originalMp + ", new MP:" +newMp);
 				robot.keyPress(key);
-				robot.delay(200);
-				botOutput("Failed to attack... retrying");
+				robot.delay(300);
 				newMp = getMp();
 			}
 			robot.delay(delay + randomPosNeg(randomNum(1,10)));

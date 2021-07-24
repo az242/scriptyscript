@@ -23,16 +23,23 @@ public class NLC extends BaseBot{
 		int position = 0;
 		long currTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
+		rebuff(.9);
 		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			System.out.println("<--------------->");
 			checkPots();
 			position = wolfSpiderMovement(position, map);
 			botOutput("Moved to position index: " + position);
-			attack(1, KeyEvent.VK_C, 2750,3500);
-			attack(1, KeyEvent.VK_V, 615);
 			feedPets();
+//			rebuff(.9);
 		}
 		exitScript();
+	}
+	public void attackInZone(Zone attackZone, MinimapData map) throws IOException{
+		moveToZoneX(attackZone,map);
+		waitOnChat();
+		attack(1, KeyEvent.VK_C, 2600, 3000);
+		waitOnChat();
+		attack(1,KeyEvent.VK_V, 615);
 	}
 	public int wolfSpiderMovement(int position, MinimapData map) throws IOException{
 		MaplePoint coords = getMinimapPosition(map);
@@ -53,10 +60,11 @@ public class NLC extends BaseBot{
 			rebuff(.5);
 			usePortal(botTeleRight, midTeleCheckRight, map);
 			Zone attackZone1 = new Zone(new MaplePoint(158,83), new MaplePoint(164,88));
-			moveToZoneX(attackZone1, map);
+			attackInZone(attackZone1, map);
 			return position + 1;
 		case 1:
 			usePortal(midTeleRight,topTeleRight, map);
+			attackInZone(topTeleRight, map);
 			return position + 1;
 		case 2:
 			Zone attackZone3 = new Zone(new MaplePoint(153,64), new MaplePoint(160,69));
@@ -64,27 +72,32 @@ public class NLC extends BaseBot{
 				moveToZoneX(attackZone3, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(attackZone3, map);
 			return position + 1;
 		case 3:
-			Zone attackZone4 = new Zone(new MaplePoint(122,75), new MaplePoint(127,81));
+			Zone attackZone4 = new Zone(new MaplePoint(70,75), new MaplePoint(127,81));
 			while(!attackZone4.isInZone(coords)) {
 				moveToZoneX(attackZone4, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(attackZone4, map);
 			return position + 1;
 		case 4:
 			while(!middleAttack.isInZone(coords)) {
 				moveToZoneX(middleAttack, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(middleAttack, map);
 			return position + 1;
 		case 5:
 			usePortal(botTeleLeft, midTeleCheckLeft, map);
 			Zone attackZoneLeft = new Zone(new MaplePoint(34,83), new MaplePoint(46,88));
 			moveToZoneX(attackZoneLeft, map);
+			attackInZone(attackZoneLeft, map);
 			return position + 1;
 		case 6:
 			usePortal(midTeleLeft, topTeleLeft, map);
+			attackInZone(topTeleLeft, map);
 			return position + 1;
 		case 7:
 			Zone attackTopLeft1 = new Zone(new MaplePoint(40,64), new MaplePoint(49,69));
@@ -92,19 +105,22 @@ public class NLC extends BaseBot{
 				moveToZoneX(attackTopLeft1, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(attackTopLeft1, map);
 			return position + 1;
 		case 8:
-			Zone attackTopLeft2 = new Zone(new MaplePoint(73,76), new MaplePoint(78,81));
+			Zone attackTopLeft2 = new Zone(new MaplePoint(73,76), new MaplePoint(120,81));
 			while(!attackTopLeft2.isInXZone(coords)) {
 				moveToZoneX(attackTopLeft2, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(attackTopLeft2, map);
 			return position + 1;
 		case 9:
 			while(!middleAttack.isInZone(coords)) {
 				moveToZoneX(middleAttack, map);
 				coords = getMinimapPosition(map);
 			}
+			attackInZone(middleAttack, map);
 			return 0;
 		}
 		return 9;
