@@ -86,8 +86,8 @@ public class Singapore extends BaseBot{
 		case "gs1":
 		case "gs2dungeon":
 		case "ulu1":
-			attack(1, KeyEvent.VK_C, 2750, 2000);
-			attack(1, KeyEvent.VK_V, 615);
+//			attack(1, KeyEvent.VK_C, 2750, 2000);
+			attack(15, KeyEvent.VK_C, 615);
 			break;
 		case "cds":
 		case "cdsdungeon":
@@ -108,7 +108,7 @@ public class Singapore extends BaseBot{
 		case "cdsdungeon":
 			return cdMovement(position, map);
 		case "gs1":
-			return GSSafeMovement(position, map);
+			return GS1Movement(position, map);
 		}
 		return 0;
 	}
@@ -256,7 +256,7 @@ public class Singapore extends BaseBot{
 				moveToZoneX(attack1, map);
 				pos = getMinimapPosition(map);
 			}
-			rebuff(.7);
+			rebuff(.9);
 			while(pos.y < 58) {
 				jumpDown();
 				pos = getMinimapPosition(map);
@@ -280,6 +280,7 @@ public class Singapore extends BaseBot{
 				moveToZoneX(attack2, map);
 				pos = getMinimapPosition(map);
 			}
+//			return position + 1;
 			return 0;
 		case 4:
 			while(!attack2.isInXZone(pos)) {
@@ -309,24 +310,36 @@ public class Singapore extends BaseBot{
 		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(46,45));
 		Zone rightSide = new Zone(new MaplePoint(80,23),new MaplePoint(92,45));
 		long currTime = System.currentTimeMillis();
-		if(currTime > dropTimer + 120*1000 && position == 1) {
-			dropTimer = currTime;
-			swapPlatforms(map);
-			moveToZoneX(leftSide, map);
-		}
+//		if(currTime > dropTimer + 120*1000 && position == 1) {
+//			dropTimer = currTime;
+//			swapPlatforms(map);
+//			moveToZoneX(leftSide, map);
+//		}
 		MaplePoint currPos = getMinimapPosition(map);
 		if(position == 0) {
+			swapPlatforms(map);
 			moveToZoneX(leftSide, map);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			rebuff(.8);
 			return 1;
-		} else{
+		} else if(position == 1){
 			moveToZoneX(rightSide, map);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			return 2;
+		}  else if(position == 2){
+			swapPlatforms(map);
+			moveToZoneX(rightSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			return 3;
+		}  else {
+			moveToZoneX(leftSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 0;
-		}
+		} 
 	}
 	
 	public int GS6Movement(int position, MinimapData map) throws IOException {
@@ -355,7 +368,7 @@ public class Singapore extends BaseBot{
 	public int GS1Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(32,2),new MaplePoint(38,45));
 		Zone rightSide = new Zone(new MaplePoint(85,2),new MaplePoint(90,45));
-//		long currTime = System.currentTimeMillis();
+		long currTime = System.currentTimeMillis();
 //		if(currTime > dropTimer + 120*1000 && position == 1) {
 //			dropTimer = currTime;
 //			swapPlatforms2(map);
@@ -363,15 +376,27 @@ public class Singapore extends BaseBot{
 //		}
 		MaplePoint currPos = getMinimapPosition(map);
 		if(position == 0) {
+			swapPlatforms2(map);
 			moveToZoneX(leftSide, map);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 1;
-		} else{
+		} else if (position == 1){
 			moveToZoneX(rightSide, map);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			rebuff(.8);
+			return 2;
+		}else if(position == 2) {
+			swapPlatforms2(map);
+			moveToZoneX(rightSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			return 3;
+		} else {
+			moveToZoneX(leftSide, map);
+			MaplePoint newPos = getMinimapPosition(map);
+			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 0;
 		}
 	}
@@ -426,7 +451,7 @@ public class Singapore extends BaseBot{
 		Zone teleUpZone = new Zone(new MaplePoint(96,38),new MaplePoint(100,45)); //teleup
 		
 		Zone droppedZone = new Zone(new MaplePoint(32,38),new MaplePoint(39,45)); //dropdown
-		Zone teledZone = new Zone(new MaplePoint(96,22),new MaplePoint(100,32)); //teleup
+		Zone teledZone = new Zone(new MaplePoint(96,19),new MaplePoint(100,28)); //teleup
 		MaplePoint startCoords = getMinimapPosition(map);
 		if(dropdownZone.isInYZone(startCoords)) {
 			MaplePoint currentCoords = getMinimapPosition(map);

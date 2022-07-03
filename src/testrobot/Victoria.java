@@ -126,6 +126,7 @@ public class Victoria extends BaseBot{
 					teleportUp();
 				pos = getMinimapPosition(map);
 			}
+			robot.delay(200);
 			rebuff(.75);
 			return position + 1;
 		case 5:

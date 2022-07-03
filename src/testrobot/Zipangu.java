@@ -159,6 +159,7 @@ public class Zipangu extends BaseBot{
 		case 0:
 			Zone att1 = new Zone(new MaplePoint(32,30), new MaplePoint(36,38));
 			moveToPlatform(att1, map);
+			robot.delay(200);
 			rebuff(.75);
  			return position + 1;
 		case 3:

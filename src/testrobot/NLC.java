@@ -57,6 +57,7 @@ public class NLC extends BaseBot{
 		switch(position) {
 		case 0:
 			moveToZoneX(botTeleRight, map);
+			robot.delay(50);
 			rebuff(.5);
 			usePortal(botTeleRight, midTeleCheckRight, map);
 			Zone attackZone1 = new Zone(new MaplePoint(158,83), new MaplePoint(164,88));

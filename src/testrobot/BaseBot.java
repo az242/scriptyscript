@@ -354,7 +354,7 @@ public abstract class BaseBot {
 					if(this.screens[i].index < 0 ) {
 //						botOutput("Checking if this screen is " + this.screens[i].name);
 						MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
-						if(foundName.x > 0) {
+						if(foundName.x >= 0) {
 							this.screens[i].index = x;
 							found = true;
 							botOutput("Verified: " + this.screens[i].name + " on screen " + x);
@@ -773,6 +773,7 @@ public abstract class BaseBot {
 		}
 	}
 	public void rebuff(double buffDuration) throws IOException {
+		robot.delay(300);
 		long temptime = System.currentTimeMillis();
 		String oldScreen = new String(currScreen);
 		for(int x=0;x<buffs.length;x++) {
@@ -811,9 +812,9 @@ public abstract class BaseBot {
 				for(int x2=0;x2<imageRecog.getWidth();x2++) {
 					for(int y2=0;y2<imageRecog.getHeight();y2++) {
 						Color pic1 = new Color(imageRecog.getRGB(x2, y2));
-						if(pic1.getRed() <= 30 && pic1.getBlue() <= 30 && pic1.getGreen() <= 30) {
+						if(pic1.getRed() <= 50 && pic1.getBlue() <= 50 && pic1.getGreen() <= 50) {
 							Color pic2 = new Color(image.getRGB(x1+x2, y1+y2));
-							if(pic2.getRed() > 30 || pic2.getBlue() > 30 || pic2.getGreen() > 30) {
+							if(pic2.getRed() > 50 || pic2.getBlue() > 50 || pic2.getGreen() > 50) {
 								matches = false;
 								//botOutput("trying to check something black at image:" + x2 + ", "+y2+" and on screen at "+(x1+x2)+", "+(y1+y2));
 							}
@@ -840,7 +841,6 @@ public abstract class BaseBot {
 			robot.keyPress(key);
 			robot.keyPress(key);
 			robot.delay(delay + randomPosNeg(randomNum(1,10)));
-			rebuff(1);
 		}
 		robot.keyRelease(key);
 	}
