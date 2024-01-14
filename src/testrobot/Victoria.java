@@ -19,6 +19,7 @@ public class Victoria extends BaseBot{
 		minimapDatas.add(jrwraith);
 		minimapDatas.add(wraith);
 		adjustMinimapData(mapleScreen);
+		botOutput("Finished Initializing Bot.");
 	}
 	
 	public void leech(int hours, MinimapData map) throws IOException {
@@ -36,7 +37,7 @@ public class Victoria extends BaseBot{
 			position = movement(position, map);
 			botOutput("Moved to position index: " + position);
 			robot.delay(200);
-			attack(1, KeyEvent.VK_C, 2750, 3000);
+			attack(1, KeyEvent.VK_C, 2750, 2100);
 			feedPets();
 		}
 		exitScript();

@@ -37,9 +37,12 @@ public class NLC extends BaseBot{
 	public void attackInZone(Zone attackZone, MinimapData map) throws IOException{
 		moveToZoneX(attackZone,map);
 		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2600, 3000);
+		attack(1, KeyEvent.VK_C, 2500, 3000);
 		waitOnChat();
 		attack(1,KeyEvent.VK_V, 615);
+//		moveToZoneX(attackZone,map);
+//		waitOnChat();
+//		attack(1, KeyEvent.VK_C, 2600, 1500);
 	}
 	public int wolfSpiderMovement(int position, MinimapData map) throws IOException{
 		MaplePoint coords = getMinimapPosition(map);

@@ -192,7 +192,7 @@ public abstract class BaseBot {
 	Robot robot;
 	LocalTime startTime;
 	Rectangle mapleScreen;
-	Rectangle chat = new Rectangle(525,700, 35, 30);
+	Rectangle chat = new Rectangle(605,705, 30, 30);
 	Rectangle home;
 	Rectangle insert;
 	Rectangle pageUp;
@@ -200,19 +200,19 @@ public abstract class BaseBot {
 	Screen[] screens;
 	String currScreen = "";
 	BuffData[] buffs = {
-			new BuffData("Haste", 200, KeyEvent.VK_R,700, "hermit"),
+			new BuffData("Haste", 200, KeyEvent.VK_R,100, "hermit"),
 			new BuffData("Mesos Up", 120, KeyEvent.VK_T,1000, "hermit"),
-			new BuffData("Hermit Pot", 3000, KeyEvent.VK_PAGE_DOWN,100, "hermit"),
+			new BuffData("Hermit Pot", 2000, KeyEvent.VK_PAGE_DOWN,100, "hermit"),
 			new BuffData("Hermit", 120, KeyEvent.VK_U,100, "hermit"),
 			
-			new BuffData("Hyperbody", 155, KeyEvent.VK_R, 100, "spearman"),
-			new BuffData("Spearman Pot", 1200, KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
-			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
+			new BuffData("Hyperbody", 155 , KeyEvent.VK_R, 100, "spearman"),
+			new BuffData("Spearman Pot", 800 , KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
+			new BuffData("Holy Symbol", 93, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
-			new BuffData("Magic Gaurd", 530, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
-			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
-			new BuffData("Magic", 550, KeyEvent.VK_DELETE,500,"bishop")
+			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
+			new BuffData("Maple Warrior", 480, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
+			new BuffData("Magic", 800, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	int startingLevel;
 	long[] buffTimers = new long[buffs.length];
@@ -385,7 +385,7 @@ public abstract class BaseBot {
 			robot.delay(200);
 			return;
 		}
-		MaplePoint upperLeft = getCurrPosition(new Rectangle(900,1400,200,50), "mapleTaskIcon.png");
+		MaplePoint upperLeft = getCurrPosition(new Rectangle(900,1400,500,50), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1400;
 		upperLeft.x = upperLeft.x + 900;
 		int width = this.screens.length*165;
