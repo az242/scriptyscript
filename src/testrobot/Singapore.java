@@ -309,6 +309,7 @@ public class Singapore extends BaseBot{
 		waitOnChat();
 		attack(1, KeyEvent.VK_C, 2500, 2000);
 	}
+	int offset = 0;
 	public int GS2Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(40,2),new MaplePoint(46,45));
 		Zone rightSide = new Zone(new MaplePoint(80,23),new MaplePoint(92,45));
@@ -319,39 +320,50 @@ public class Singapore extends BaseBot{
 //			moveToZoneX(leftSide, map);
 //		}
 		MaplePoint currPos = getMinimapPosition(map);
+		int attack = KeyEvent.VK_C;
+		if(offset >= 5) {
+			attack = KeyEvent.VK_V;
+		}
+		
+		botOutput("offset: " + offset);
 		if(position == 0) {
 			swapPlatforms(map);
-			moveToZoneXAttack(leftSide, map);
+			moveToZoneXAttack(leftSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			rebuff(.8);
 			return 1;
 		} else if(position == 1){
-			moveToZoneXAttack(rightSide, map);
+			moveToZoneXAttack(rightSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 2;
 		}  else if(position == 2){
 			swapPlatforms(map);
-			moveToZoneXAttack(rightSide, map);
+			moveToZoneXAttack(rightSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 3;
 		}  else {
-			moveToZoneXAttack(leftSide, map);
+			moveToZoneXAttack(leftSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
+			if(offset >=5) {
+				offset = 0;
+			} else {
+				offset++;
+			}
 			return 0;
 		} 
 	}
-	public void moveToZoneXAttack(Zone zone, MinimapData map) throws IOException {
+	public void moveToZoneXAttack(Zone zone, MinimapData map, int attackKey) throws IOException {
 		MaplePoint tempCoords = getMinimapPosition(map);
 		if(tempCoords.x < zone.getLeftBound()) {
 			robot.keyPress(KeyEvent.VK_RIGHT);
 			while(tempCoords.x < zone.getLeftBound()) {
 				if(tempCoords.x + 11 < zone.getRightBound()){
-					robot.keyPress(KeyEvent.VK_V);
-					robot.keyPress(KeyEvent.VK_V);
+					robot.keyPress(attackKey);
+					robot.keyPress(attackKey);
 					robot.delay(100);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);
@@ -367,8 +379,8 @@ public class Singapore extends BaseBot{
 			robot.keyPress(KeyEvent.VK_LEFT);
 			while(tempCoords.x > zone.getRightBound()) {
 				if(tempCoords.x - 11 > zone.getLeftBound()){
-					robot.keyPress(KeyEvent.VK_V);
-					robot.keyPress(KeyEvent.VK_V);
+					robot.keyPress(attackKey);
+					robot.keyPress(attackKey);
 					robot.delay(100);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);

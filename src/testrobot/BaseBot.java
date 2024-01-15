@@ -207,7 +207,7 @@ public abstract class BaseBot {
 			
 			new BuffData("Hyperbody", 155 , KeyEvent.VK_R, 100, "spearman"),
 			new BuffData("Spearman Pot", 800 , KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
-			new BuffData("Holy Symbol", 93, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
+			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
