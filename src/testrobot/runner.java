@@ -22,7 +22,7 @@ public class runner {
 //			bot.enableSkill("Haste");
 //			bot.enableSkill("Hermit Pot");
 			bot.swapMapleScreen(bot.getScreen("bishop"));
-			bot.leech(4, bot.getMap("gs2"));
+			bot.leech(4, bot.getMap("gs6"));
 //			bot.rebuff(.5);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

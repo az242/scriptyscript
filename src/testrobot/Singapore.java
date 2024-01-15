@@ -12,6 +12,7 @@ public class Singapore extends BaseBot{
 	MinimapData gs2Dungeon = new MinimapData("gs2dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"minimapNames/gs2dungeon.png");
 	MinimapData gs2 = new MinimapData("gs2", new Rectangle(6,72,121,53), new Rectangle(47,45,75,15),"minimapNames/gs2mapName.png");
 	MinimapData gs1 = new MinimapData("gs1", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"minimapNames/gs1mapName.png");
+	MinimapData gs6 = new MinimapData("gs6", new Rectangle(6,72,115,53), new Rectangle(47,45,75,15),"minimapNames/gs2mapName.png");
 	
 	MinimapData ulu2 = new MinimapData("ulu2", new Rectangle(6,72,132,81), new Rectangle(47,45,70,15),"minimapNames/ulu2Mapname.png");
 	MinimapData ulu1 = new MinimapData("ulu1", new Rectangle(6,72,132,104), new Rectangle(47,45,70,15),"minimapNames/ulu2Mapname.png");
@@ -25,6 +26,7 @@ public class Singapore extends BaseBot{
 	long dropTimer = 0;
 	public Singapore(Robot robot, Screen[] screens) {
 		super(robot, screens);
+		minimapDatas.add(gs6);
 		minimapDatas.add(gs2Dungeon);
 		minimapDatas.add(gs2);
 		minimapDatas.add(gs1);
@@ -84,10 +86,11 @@ public class Singapore extends BaseBot{
 			break;
 		case "gs2":
 		case "gs1":
+		case "gs6":
 		case "gs2dungeon":
 		case "ulu1":
 //			attack(1, KeyEvent.VK_C, 2750, 2000);
-			attack(6, KeyEvent.VK_C, 615);
+			attack(10, KeyEvent.VK_C, 615);
 //			attack(1, KeyEvent.VK_V, 1115);
 			
 			break;
@@ -112,6 +115,8 @@ public class Singapore extends BaseBot{
 			return cdMovement(position, map);
 		case "gs1":
 			return GS1Movement(position, map);
+		case "gs6":
+			return GS6Movement(position, map);
 		}
 		return 0;
 	}
@@ -368,7 +373,7 @@ public class Singapore extends BaseBot{
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);
 					robot.keyRelease(KeyEvent.VK_ALT);
-					robot.delay(1000 + randomPosNeg(randomNum(1,10)));
+					robot.delay(900 + randomPosNeg(randomNum(1,10)));
 				} else {
 					robot.delay(35);
 				}
@@ -385,7 +390,7 @@ public class Singapore extends BaseBot{
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.delay(75);
 					robot.keyRelease(KeyEvent.VK_ALT);
-					robot.delay(1000 + randomPosNeg(randomNum(1,10)));
+					robot.delay(900 + randomPosNeg(randomNum(1,10)));
 				} else {
 					robot.delay(35);
 				}
@@ -396,7 +401,7 @@ public class Singapore extends BaseBot{
 	}
 	public int GS6Movement(int position, MinimapData map) throws IOException {
 		Zone leftSide = new Zone(new MaplePoint(32,2),new MaplePoint(38,45));
-		Zone rightSide = new Zone(new MaplePoint(85,2),new MaplePoint(90,45));
+		Zone rightSide = new Zone(new MaplePoint(70,2),new MaplePoint(85,45));
 //		long currTime = System.currentTimeMillis();
 //		if(currTime > dropTimer + 120*1000 && position == 1) {
 //			dropTimer = currTime;
@@ -404,13 +409,14 @@ public class Singapore extends BaseBot{
 //			moveToZoneX(leftSide, map);
 //		}
 		MaplePoint currPos = getMinimapPosition(map);
+		int attack = KeyEvent.VK_C;
 		if(position == 0) {
-			moveToZoneX(leftSide, map);
+			moveToZoneXAttack(leftSide, map,attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			return 1;
 		} else{
-			moveToZoneX(rightSide, map);
+			moveToZoneXAttack(rightSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
 			rebuff(.8);
