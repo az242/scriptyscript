@@ -81,8 +81,9 @@ public class Singapore extends BaseBot{
 		switch(map.name) {
 		case "ulu2":
 //			attackheal();
-			attack(1, KeyEvent.VK_C, 2750, 3000);
-			attack(1, KeyEvent.VK_V, 615);
+//			attack(1, KeyEvent.VK_C, 2750, 2100);
+//			attack(1, KeyEvent.VK_V, 615);
+			
 			break;
 		case "gs2":
 		case "gs1":
@@ -90,7 +91,7 @@ public class Singapore extends BaseBot{
 		case "gs2dungeon":
 		case "ulu1":
 //			attack(1, KeyEvent.VK_C, 2750, 2000);
-			attack(10, KeyEvent.VK_C, 615);
+			attack(1, KeyEvent.VK_V, 615);
 //			attack(1, KeyEvent.VK_V, 1115);
 			
 			break;
@@ -253,66 +254,94 @@ public class Singapore extends BaseBot{
 		Zone attack1 = new Zone(new MaplePoint(33,27), new MaplePoint(40,66));
 		Zone attack2 = new Zone(new MaplePoint(67,27), new MaplePoint(75,66));
 		Zone attack3 = new Zone(new MaplePoint(97,27), new MaplePoint(112,66));
-		
+		Zone attack2Top = new Zone(new MaplePoint(58,27), new MaplePoint(65,66));
+		Zone attack3Top = new Zone(new MaplePoint(101,27), new MaplePoint(107,66));
 		Zone rope = new Zone(new MaplePoint(93,27), new MaplePoint(93,66));
 		Zone checkZone = new Zone(new MaplePoint(10,35), new MaplePoint(130,41));
 		
 		MaplePoint pos = getMinimapPosition(map);
+		botOutput("Offset: " + offset);
 		switch(position) {
 		case 0:
 			while(!attack1.isInXZone(pos)) {
-				moveToZoneX(attack1, map);
+				telecastAttackMove(attacks.get("genesis"),attack1, map);
 				pos = getMinimapPosition(map);
 			}
-			rebuff(.9);
+			rebuff(.8);
 			while(pos.y < 58) {
 				jumpDown();
 				pos = getMinimapPosition(map);
 			}
+			
 			return position + 1;
 		case 1:
-			while(!attack2.isInXZone(pos)) {
-				moveToZoneX(attack2, map);
+			while(pos.y < 58) {
+				jumpDown();
 				pos = getMinimapPosition(map);
+			}
+			while(!attack2.isInXZone(pos)) {
+				telecastAttackMove(attacks.get("genesis"),attack2, map);
+				pos = getMinimapPosition(map);
+			}
+			if(offset >=5) {
+				offset = 0;
 			}
 			return position + 1;
 		case 2:
 			while(!attack3.isInXZone(pos)) {
-				moveToZoneX(attack3, map);
+				telecastAttackMove(attacks.get("genesis"),attack3, map);
 				pos = getMinimapPosition(map);
 			}
 			return position + 1;
 		case 3:
-//			climbRope(rope,checkZone, map);
-			while(!attack2.isInXZone(pos)) {
-				moveToZoneX(attack2, map);
-				pos = getMinimapPosition(map);
+			offset++;
+			if(offset >= 5) {
+				climbRope(rope,checkZone, map);
+				while(!attack3Top.isInXZone(pos)) {
+					telecastAttackMove(attacks.get("genesis"),attack3Top, map);
+					pos = getMinimapPosition(map);
+				}
+				robot.keyPress(KeyEvent.VK_SPACE);
+				return position + 1;
+			} else {
+				while(!attack2.isInXZone(pos)) {
+					telecastAttackMove(attacks.get("genesis"),attack2, map);
+					pos = getMinimapPosition(map);
+				}
+				return 0;
 			}
-//			return position + 1;
-			return 0;
 		case 4:
-			while(!attack2.isInXZone(pos)) {
-				moveToZoneX(attack2, map);
-				pos = getMinimapPosition(map);
+			if(offset >= 5) {
+				while(!attack2Top.isInXZone(pos)) {
+					telecastAttackMove(attacks.get("genesis"),attack2Top, map);
+					pos = getMinimapPosition(map);
+				}
+				robot.keyPress(KeyEvent.VK_SPACE);
+			} else {
+				return 0;
 			}
+			
 			return position + 1;
 		case 5:
+			
 			while(!attack1.isInXZone(pos)) {
-				moveToZoneX(attack1, map);
+				telecastAttackMove(attacks.get("genesis"),attack1, map);
 				pos = getMinimapPosition(map);
 			}
-			return 0;
+			rebuff(.9);
+			return 1;
 			
 		}
 		return 0;
 	}
 	public void attackheal() throws IOException {
 		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2500, 2000);
+		attack(1, KeyEvent.VK_C, 2400, 2000);
 		waitOnChat();
-		attack(1,KeyEvent.VK_V, 615);
-		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2500, 2000);
+//		attack(1, KeyEvent.VK_C, 2400, 2000);
+//		waitOnChat();
+		attack(1,KeyEvent.VK_V, 100);
+		
 	}
 	int offset = 0;
 	public int GS2Movement(int position, MinimapData map) throws IOException {
@@ -325,10 +354,10 @@ public class Singapore extends BaseBot{
 //			moveToZoneX(leftSide, map);
 //		}
 		MaplePoint currPos = getMinimapPosition(map);
-		int attack = KeyEvent.VK_C;
-		if(offset >= 5) {
-			attack = KeyEvent.VK_V;
-		}
+		int attack = KeyEvent.VK_N;
+//		if(offset >= 5) {
+//			attack = KeyEvent.VK_V;
+//		}
 		
 		botOutput("offset: " + offset);
 		if(position == 0) {
@@ -353,11 +382,11 @@ public class Singapore extends BaseBot{
 			moveToZoneXAttack(leftSide, map, attack);
 			MaplePoint newPos = getMinimapPosition(map);
 			botOutput("Move from " + currPos.toString() + " to " + newPos.toString());
-			if(offset >=5) {
-				offset = 0;
-			} else {
-				offset++;
-			}
+//			if(offset >=5) {
+//				offset = 0;
+//			} else {
+//				offset++;
+//			}
 			return 0;
 		} 
 	}
