@@ -905,12 +905,14 @@ public abstract class BaseBot {
 		robot.keyRelease(attack.key);
 	}
 	public void telecastAttackMove(AttackData attack, Zone zone, MinimapData map) throws IOException{
+		waitOnChat();
 		MaplePoint tempCoords = getMinimapPosition(map);
 		if(tempCoords.x < zone.getLeftBound()) {
 			robot.keyPress(KeyEvent.VK_RIGHT);
 			robot.keyPress(KeyEvent.VK_ALT);
 			robot.keyRelease(KeyEvent.VK_ALT);
 			robot.keyPress(attack.key);
+			long startTime = System.currentTimeMillis();
 			robot.keyRelease(attack.key);
 			
 			while(tempCoords.x < zone.getLeftBound()) {
@@ -924,11 +926,20 @@ public abstract class BaseBot {
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_RIGHT);
+			long endTime = System.currentTimeMillis();
+			while(endTime - startTime < attack.delay) {
+				robot.delay(50);
+				endTime = System.currentTimeMillis();
+			}
 		} else if(tempCoords.x > zone.getRightBound()) {
 			robot.keyPress(KeyEvent.VK_LEFT);
 			robot.keyPress(KeyEvent.VK_ALT);
 			robot.keyRelease(KeyEvent.VK_ALT);
 			robot.keyPress(attack.key);
+<<<<<<< HEAD
+=======
+			long startTime = System.currentTimeMillis();
+>>>>>>> 89f93937b3554949ed69887f8532887f7f150d7a
 			robot.keyRelease(attack.key);
 			while(tempCoords.x > zone.getRightBound()) {
 				if(tempCoords.x - 11 > zone.getLeftBound()){
@@ -941,6 +952,11 @@ public abstract class BaseBot {
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_LEFT);
+			long endTime = System.currentTimeMillis();
+			while(endTime - startTime < attack.delay) {
+				robot.delay(50);
+				endTime = System.currentTimeMillis();
+			}
 		}
 	}
 	public void moveToZoneXAttack(Zone zone, MinimapData map, int attackKey) throws IOException {
