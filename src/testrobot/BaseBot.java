@@ -927,7 +927,9 @@ public abstract class BaseBot {
 		} else if(tempCoords.x > zone.getRightBound()) {
 			robot.keyPress(KeyEvent.VK_LEFT);
 			robot.keyPress(KeyEvent.VK_ALT);
+			robot.keyRelease(KeyEvent.VK_ALT);
 			robot.keyPress(attack.key);
+			robot.keyRelease(attack.key);
 			while(tempCoords.x > zone.getRightBound()) {
 				if(tempCoords.x - 11 > zone.getLeftBound()){
 					robot.delay(100);
