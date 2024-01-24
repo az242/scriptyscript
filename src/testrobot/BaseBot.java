@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -188,6 +189,20 @@ class BuffData {
 		this.enabled = false;
 	}
 }
+class AttackData {
+	int delay;
+	int key;
+	int manaCost;
+	public AttackData(int key, int delay, int manaCost) {
+		this.delay =delay;
+		this.key = key;
+		this.manaCost = manaCost;
+	}
+	public AttackData(int key, int delay) {
+		this.delay =delay;
+		this.key = key;
+	}
+}
 public abstract class BaseBot {
 	Robot robot;
 	LocalTime startTime;
@@ -214,12 +229,16 @@ public abstract class BaseBot {
 			new BuffData("Maple Warrior", 480, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
 			new BuffData("Magic", 800, KeyEvent.VK_DELETE,500,"bishop")
 	};
+	HashMap<String, AttackData> attacks = new HashMap<String, AttackData>();
 	int startingLevel;
 	long[] buffTimers = new long[buffs.length];
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
 	public BaseBot(Robot robot, Screen[] screens) {
+		this.attacks.put("genesis", new AttackData(KeyEvent.VK_C, 2375, 2500));
+		this.attacks.put("heal", new AttackData(KeyEvent.VK_V, 590));
+		this.attacks.put("shining", new AttackData(KeyEvent.VK_N, 1050));
 		this.robot = robot;
 		this.screens = screens;
 		startTime = LocalTime.now();
@@ -461,7 +480,7 @@ public abstract class BaseBot {
 	}
 	public int getMp() throws IOException {
 		int mp = 0;
-		Rectangle MPRect = new Rectangle(353,739,35,7);
+		Rectangle MPRect = new Rectangle(395,739,35,7);
 		MPRect = adjustRectangle(mapleScreen, MPRect);
 		ArrayList<Integer> numbersFound = findNums(MPRect);
 		for(int x=0;x<numbersFound.size();x++) {
@@ -861,6 +880,104 @@ public abstract class BaseBot {
 			robot.delay(delay + randomPosNeg(randomNum(1,10)));
 		}
 		robot.keyRelease(key);
+	}
+	public void attack(AttackData attack, int numAttacks) throws IOException {
+		botOutput("Attacking " + numAttacks + " times with " + attack.delay + "ms Delay.");
+		int originalMp = 0;
+		if(attack.manaCost != 0) {
+			originalMp = getMp();
+		}
+		for(int x=0;x<numAttacks;x++) {
+			waitOnChat();
+			robot.keyPress(attack.key);
+			robot.delay(300);
+			if(attack.manaCost != 0) {
+				int newMp = getMp();
+				while(Math.abs(originalMp-newMp) < attack.manaCost) {
+					botOutput("Failed to attack... retrying origMP:" + originalMp + ", new MP:" +newMp);
+					robot.keyPress(attack.key);
+					robot.delay(300);
+					newMp = getMp();
+				}
+			}
+			robot.delay(attack.delay + randomPosNeg(randomNum(1,10)));
+		}
+		robot.keyRelease(attack.key);
+	}
+	public void telecastAttackMove(AttackData attack, Zone zone, MinimapData map) throws IOException{
+		MaplePoint tempCoords = getMinimapPosition(map);
+		if(tempCoords.x < zone.getLeftBound()) {
+			robot.keyPress(KeyEvent.VK_RIGHT);
+			robot.keyPress(KeyEvent.VK_ALT);
+			robot.keyRelease(KeyEvent.VK_ALT);
+			robot.keyPress(attack.key);
+			robot.keyRelease(attack.key);
+			
+			while(tempCoords.x < zone.getLeftBound()) {
+				if(tempCoords.x + 11 < zone.getRightBound()){
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_RIGHT);
+		} else if(tempCoords.x > zone.getRightBound()) {
+			robot.keyPress(KeyEvent.VK_LEFT);
+			robot.keyPress(KeyEvent.VK_ALT);
+			robot.keyPress(attack.key);
+			while(tempCoords.x > zone.getRightBound()) {
+				if(tempCoords.x - 11 > zone.getLeftBound()){
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_LEFT);
+		}
+	}
+	public void moveToZoneXAttack(Zone zone, MinimapData map, int attackKey) throws IOException {
+		MaplePoint tempCoords = getMinimapPosition(map);
+		if(tempCoords.x < zone.getLeftBound()) {
+			robot.keyPress(KeyEvent.VK_RIGHT);
+			while(tempCoords.x < zone.getLeftBound()) {
+				if(tempCoords.x + 11 < zone.getRightBound()){
+					robot.keyPress(attackKey);
+					robot.keyPress(attackKey);
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.delay(75);
+					robot.keyRelease(KeyEvent.VK_ALT);
+					robot.delay(900 + randomPosNeg(randomNum(1,10)));
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_RIGHT);
+		} else if(tempCoords.x > zone.getRightBound()) {
+			robot.keyPress(KeyEvent.VK_LEFT);
+			while(tempCoords.x > zone.getRightBound()) {
+				if(tempCoords.x - 11 > zone.getLeftBound()){
+					robot.keyPress(attackKey);
+					robot.keyPress(attackKey);
+					robot.delay(100);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.delay(75);
+					robot.keyRelease(KeyEvent.VK_ALT);
+					robot.delay(900 + randomPosNeg(randomNum(1,10)));
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_LEFT);
+		}
 	}
 	public Screen getScreen(String name) {
 		for(int x=0;x<this.screens.length;x++) {
