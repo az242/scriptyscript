@@ -211,7 +211,7 @@ public abstract class BaseBot {
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
-			new BuffData("Maple Warrior", 480, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
+			new BuffData("Maple Warrior", 300, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
 			new BuffData("Magic", 800, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	int startingLevel;
@@ -451,7 +451,7 @@ public abstract class BaseBot {
 	}
 	public int getHp() throws IOException {
 		int hp = 0;
-		Rectangle hpRect = new Rectangle(241,739,35,7);
+		Rectangle hpRect = new Rectangle(262,739,35,7);
 		hpRect = adjustRectangle(mapleScreen, hpRect);
 		ArrayList<Integer> numbersFound = findNums(hpRect);
 		for(int x=0;x<numbersFound.size();x++) {
@@ -461,7 +461,7 @@ public abstract class BaseBot {
 	}
 	public int getMp() throws IOException {
 		int mp = 0;
-		Rectangle MPRect = new Rectangle(353,739,35,7);
+		Rectangle MPRect = new Rectangle(395,739,35,7);
 		MPRect = adjustRectangle(mapleScreen, MPRect);
 		ArrayList<Integer> numbersFound = findNums(MPRect);
 		for(int x=0;x<numbersFound.size();x++) {
