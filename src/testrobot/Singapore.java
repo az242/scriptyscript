@@ -4,6 +4,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.time.LocalTime;
@@ -23,6 +24,8 @@ public class Singapore extends BaseBot{
 	MinimapData cd = new MinimapData("cds", new Rectangle(33,72,141,80), new Rectangle(47,45,115,15),"minimapNames/cdName.png");
 	MinimapData cddungeon = new MinimapData("cdsdungeon", new Rectangle(64,72,141,80), new Rectangle(47,45,115,15),"minimapNames/cdName.png");
 	
+	MinimapData cityMap = new MinimapData("singapore", new Rectangle(6,72,210,93), new Rectangle(48,46,70,15), "minimapNames/singapore.png");
+	
 	long dropTimer = 0;
 	public Singapore(Robot robot, Screen[] screens) {
 		super(robot, screens);
@@ -34,6 +37,7 @@ public class Singapore extends BaseBot{
 		minimapDatas.add(ulu1);
 		minimapDatas.add(cd);
 		minimapDatas.add(cddungeon);
+		minimapDatas.add(cityMap);
 		adjustMinimapData(mapleScreen);
 	}
 
@@ -72,7 +76,9 @@ public class Singapore extends BaseBot{
 			if(MINUTES.between(this.startTime, now) > minutes ) {
 				minutes = (int) MINUTES.between(this.startTime, now);
 				botOutput("Script ran for " + minutes + " minutes");
+				checkEquipment();
 			}
+			
 		}
 		exitScript();
 	}
@@ -216,6 +222,116 @@ public class Singapore extends BaseBot{
 		robot.keyPress(KeyEvent.VK_V);
 		robot.delay(300);
 		robot.keyRelease(KeyEvent.VK_V);
+	}
+	public MaplePoint findInventory() throws IOException {
+		Rectangle inventorySearch = new Rectangle(850,50, 175, 650);
+		inventorySearch = adjustRectangle(mapleScreen, inventorySearch);
+		MaplePoint x = getCurrPosition(inventorySearch, "inventory/inventory.png");
+		if(x.x < 0) {
+			
+		} else {
+			//adjust
+			x.x = inventorySearch.x + x.x;
+			x.y = inventorySearch.y + x.y;
+		}
+		
+		return x;
+	}
+	public void checkEquipment() throws IOException {
+		MaplePoint invLoc = findInventory();
+		if(invLoc.x < 0) {
+			robot.keyPress(KeyEvent.VK_I);
+			robot.keyRelease(KeyEvent.VK_I);
+			robot.delay(100);
+			invLoc = findInventory();
+			if(invLoc.x < 0) {
+				//inventory couldnt be found
+				return;
+			}
+		}
+		System.out.println(invLoc.toString());
+		MaplePoint EquipButton = new MaplePoint(10 + invLoc.x,25 + invLoc.y);
+		robot.mouseMove(EquipButton.x, EquipButton.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		
+		
+		robot.delay(100);
+		MaplePoint scrollbarLocation = new MaplePoint(155 + invLoc.x,220 + invLoc.y);
+		robot.mouseMove(scrollbarLocation.x, scrollbarLocation.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(1000);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(100);
+		
+		Rectangle equipfullsearch = new Rectangle(106 + invLoc.x ,209 + invLoc.y,34,34);
+		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
+		if(equipExists.x > 0) {
+			//inventory empty close it
+			robot.keyPress(KeyEvent.VK_I);
+			robot.keyRelease(KeyEvent.VK_I);
+			robot.delay(100);
+		} else {
+			//inventory is full! initiate sell procedure
+			sellEquips();
+		}
+	}
+	
+	public void sellEquips() throws IOException {
+		while(checkMapMatch(cityMap).x < 0) {
+			robot.keyPress(KeyEvent.VK_J);
+			robot.keyRelease(KeyEvent.VK_J);
+			robot.delay(600);
+			robot.keyPress(KeyEvent.VK_UP);
+			robot.keyRelease(KeyEvent.VK_UP);
+			robot.delay(2000);
+		}
+		
+		MaplePoint pos = getMinimapPosition(cityMap);
+		System.out.println(pos.toString());
+		Zone sellZone = new Zone(new MaplePoint(98,27), new MaplePoint(100,80));
+		moveToZoneX(sellZone, cityMap);
+		robot.delay(2000);
+		MaplePoint invLoc = findInventory();
+		System.out.println(invLoc.toString());
+		MaplePoint sellerClick = new MaplePoint(335 + mapleScreen.x,690 + mapleScreen.y);
+		robot.mouseMove(sellerClick.x, sellerClick.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(200);
+		
+		MaplePoint initSell = new MaplePoint(560 + mapleScreen.x, 350 + mapleScreen.y);
+		robot.mouseMove(initSell.x, initSell.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(1000);
+		
+		Rectangle equipsearch = new Rectangle(516 + mapleScreen.x ,341 + mapleScreen.y,36,36);
+		MaplePoint equipExists = getCurrPosition(equipsearch, "inventory/storeEmptySlot.png");
+		MaplePoint sellItembutton = new MaplePoint(700 + mapleScreen.x, 255 + mapleScreen.y);
+		robot.mouseMove(sellItembutton.x, sellItembutton.y);
+		robot.keyPress(KeyEvent.VK_Y);
+		while(equipExists.x < 0) {
+			robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+			robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+			robot.delay(200);
+			equipExists = getCurrPosition(equipsearch, "inventory/storeEmptySlot.png");
+			robot.keyPress(KeyEvent.VK_Y);
+		}
+		robot.keyRelease(KeyEvent.VK_Y);
+		robot.keyPress(KeyEvent.VK_ESCAPE);
+		robot.keyRelease(KeyEvent.VK_ESCAPE);
+		
+		
+		Zone tpBackZone = new Zone(new MaplePoint(81,27), new MaplePoint(83,80));
+		moveToZoneX(tpBackZone, cityMap);
+		robot.delay(200);
+		robot.keyPress(KeyEvent.VK_UP);
+		robot.keyRelease(KeyEvent.VK_UP);
+		robot.delay(2000);
+		System.out.println("done");
 	}
 	public int ulu1(int position, MinimapData map) throws IOException {
 		MaplePoint pos = getMinimapPosition(map);

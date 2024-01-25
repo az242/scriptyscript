@@ -275,7 +275,6 @@ public abstract class BaseBot {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 	public void enableSkill(String skillName) {
 		for(int x=0;x<buffs.length;x++) {
@@ -442,6 +441,10 @@ public abstract class BaseBot {
 			exitScript();
 		}
 		return getCurrPosition(data.minimap,"minimapLocation.png");
+	}
+	public MaplePoint checkMapMatch(MinimapData data) throws IOException {
+		MaplePoint matches = getCurrPosition(data.minimapName,data.minimapNameFileName);
+		return matches;
 	}
 	public MaplePoint getCurrPosition(Rectangle rect, String fileName) throws IOException {
 		BufferedImage imageRecog = ImageIO.read(new File(fileName));
