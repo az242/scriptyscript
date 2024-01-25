@@ -15,14 +15,14 @@ public class runner {
 			bot.enableSkill("Holy Symbol");
 			bot.enableSkill("Invincible");
 			bot.enableSkill("Magic Gaurd");
-//			bot.enableSkill("Maple Warrior");
+			bot.enableSkill("Maple Warrior");
 //			bot.enableSkill("Magic");
 //			bot.enableSkill("Hyperbody");
 //			bot.enableSkill("Spearman Pot");
 //			bot.enableSkill("Haste");
 //			bot.enableSkill("Hermit Pot");
 			bot.swapMapleScreen(bot.getScreen("bishop"));
-			bot.leech(4, bot.getMap("gs6"));
+			bot.leech(8, bot.getMap("ulu2"));
 //			bot.rebuff(.5);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

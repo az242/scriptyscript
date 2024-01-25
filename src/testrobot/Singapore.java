@@ -251,7 +251,7 @@ public class Singapore extends BaseBot{
 		return 0;
 	}
 	public int ulu2(int position, MinimapData map) throws IOException {
-		Zone attack1 = new Zone(new MaplePoint(33,27), new MaplePoint(40,66));
+		Zone attack1 = new Zone(new MaplePoint(30,27), new MaplePoint(37,66));
 		Zone attack2 = new Zone(new MaplePoint(67,27), new MaplePoint(75,66));
 		Zone attack3 = new Zone(new MaplePoint(97,27), new MaplePoint(112,66));
 		Zone attack2Top = new Zone(new MaplePoint(58,27), new MaplePoint(65,66));
@@ -263,10 +263,7 @@ public class Singapore extends BaseBot{
 		botOutput("Offset: " + offset);
 		switch(position) {
 		case 0:
-			while(!attack1.isInXZone(pos)) {
-				telecastAttackMove(attacks.get("genesis"),attack1, map);
-				pos = getMinimapPosition(map);
-			}
+			telecastAttackMove(attacks.get("genesis"),attack1, map);
 			rebuff(.8);
 			while(pos.y < 58) {
 				jumpDown();
@@ -279,44 +276,33 @@ public class Singapore extends BaseBot{
 				jumpDown();
 				pos = getMinimapPosition(map);
 			}
-			while(!attack2.isInXZone(pos)) {
-				telecastAttackMove(attacks.get("genesis"),attack2, map);
-				pos = getMinimapPosition(map);
-			}
+			telecastAttackMove(attacks.get("genesis"),attack2, map);
 			if(offset >=5) {
 				offset = 0;
 			}
 			return position + 1;
 		case 2:
-			while(!attack3.isInXZone(pos)) {
-				telecastAttackMove(attacks.get("genesis"),attack3, map);
-				pos = getMinimapPosition(map);
-			}
+			telecastAttackMove(attacks.get("genesis"),attack3, map);
 			return position + 1;
 		case 3:
 			offset++;
 			if(offset >= 5) {
 				climbRope(rope,checkZone, map);
-				while(!attack3Top.isInXZone(pos)) {
-					telecastAttackMove(attacks.get("genesis"),attack3Top, map);
-					pos = getMinimapPosition(map);
-				}
+				telecastAttackMove(attacks.get("genesis"),attack3Top, map);
 				robot.keyPress(KeyEvent.VK_SPACE);
+				robot.keyRelease(KeyEvent.VK_SPACE);
+				robot.delay(800);
 				return position + 1;
 			} else {
-				while(!attack2.isInXZone(pos)) {
-					telecastAttackMove(attacks.get("genesis"),attack2, map);
-					pos = getMinimapPosition(map);
-				}
+				telecastAttackMove(attacks.get("genesis"),attack2, map);
 				return 0;
-			}
+			  }
 		case 4:
 			if(offset >= 5) {
-				while(!attack2Top.isInXZone(pos)) {
-					telecastAttackMove(attacks.get("genesis"),attack2Top, map);
-					pos = getMinimapPosition(map);
-				}
+				telecastAttackMove(attacks.get("genesis"),attack2Top, map);
 				robot.keyPress(KeyEvent.VK_SPACE);
+				robot.keyRelease(KeyEvent.VK_SPACE);
+				robot.delay(800);
 			} else {
 				return 0;
 			}
@@ -324,10 +310,7 @@ public class Singapore extends BaseBot{
 			return position + 1;
 		case 5:
 			
-			while(!attack1.isInXZone(pos)) {
-				telecastAttackMove(attacks.get("genesis"),attack1, map);
-				pos = getMinimapPosition(map);
-			}
+			telecastAttackMove(attacks.get("genesis"),attack1, map);
 			rebuff(.9);
 			return 1;
 			

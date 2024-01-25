@@ -936,10 +936,7 @@ public abstract class BaseBot {
 			robot.keyPress(KeyEvent.VK_ALT);
 			robot.keyRelease(KeyEvent.VK_ALT);
 			robot.keyPress(attack.key);
-<<<<<<< HEAD
-=======
 			long startTime = System.currentTimeMillis();
->>>>>>> 89f93937b3554949ed69887f8532887f7f150d7a
 			robot.keyRelease(attack.key);
 			while(tempCoords.x > zone.getRightBound()) {
 				if(tempCoords.x - 11 > zone.getLeftBound()){
@@ -952,6 +949,15 @@ public abstract class BaseBot {
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_LEFT);
+			long endTime = System.currentTimeMillis();
+			while(endTime - startTime < attack.delay) {
+				robot.delay(50);
+				endTime = System.currentTimeMillis();
+			}
+		} else {
+			robot.keyPress(attack.key);
+			long startTime = System.currentTimeMillis();
+			robot.keyRelease(attack.key);
 			long endTime = System.currentTimeMillis();
 			while(endTime - startTime < attack.delay) {
 				robot.delay(50);
@@ -1075,7 +1081,7 @@ public abstract class BaseBot {
 		robot.delay(100);
 		robot.keyRelease(KeyEvent.VK_DOWN);
 		robot.keyRelease(KeyEvent.VK_SPACE);
-		robot.delay(1000);
+		robot.delay(500);
 	}
 	public void botOutput(String output) {
 		LocalTime myObj = LocalTime.now();

@@ -162,18 +162,20 @@ public class Victoria extends BaseBot{
 			if(position == 7 ) 
 				return 0;
 			return position + 1;
-		case 6:
+		case 5:
 		case 1:
 			Zone att2 = new Zone(new MaplePoint(112,37), new MaplePoint(114,42));
 			moveToPlatform(att2, map);
 			rebuff(.75);
+			if(position == 5) {
+				return 0;
+			}
 			return position + 1;
-		case 5:
+		case 4:
 		case 2:
 			Zone att3 = new Zone(new MaplePoint(142,37), new MaplePoint(148,42));
 			moveToPlatform(att3, map);
 			return position + 1;
-		case 4:
 		case 3:
 			Zone att4 = new Zone(new MaplePoint(200,37), new MaplePoint(206,42));
 			moveToPlatform(att4, map);
