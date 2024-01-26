@@ -53,6 +53,7 @@ public class Singapore extends BaseBot{
 		botOutput("Starting at position: " + cords.toString());
 		int position = 0;
 		int lootPosition = 0;
+		startingMesos = getMesos();
 		long currTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
 		rebuff(.75);
@@ -376,13 +377,14 @@ public class Singapore extends BaseBot{
 		Zone checkZone = new Zone(new MaplePoint(10,35), new MaplePoint(130,41));
 		
 		MaplePoint pos = getMinimapPosition(map);
-		botOutput("Offset: " + offset);
+//		botOutput("Offset: " + offset);
 		switch(position) {
 		case 0:
 			telecastAttackMove(attacks.get("genesis"),attack1, map);
 			rebuff(.8);
 			while(pos.y < 58) {
 				jumpDown();
+				botOutput("Ending sweep rotation.");
 				pos = getMinimapPosition(map);
 			}
 			
@@ -403,6 +405,7 @@ public class Singapore extends BaseBot{
 		case 3:
 			offset++;
 			if(offset >= 5) {
+				botOutput("Starting sweep rotation.");
 				climbRope(rope,checkZone, map);
 				telecastAttackMove(attacks.get("genesis"),attack3Top, map);
 				robot.keyPress(KeyEvent.VK_SPACE);

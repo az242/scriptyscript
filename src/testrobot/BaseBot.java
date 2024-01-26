@@ -257,6 +257,7 @@ public abstract class BaseBot {
 		insert = adjustRectangle(mapleScreen, new Rectangle(840, 723, 10, 12));
 		pageUp = adjustRectangle(mapleScreen, new Rectangle(910, 723, 10, 12));
 		buffZone = adjustRectangle(mapleScreen, new Rectangle(990, 24, 30, 30));
+		
 		try {
 			initScreens();
 		} catch (IOException e) {
@@ -280,6 +281,12 @@ public abstract class BaseBot {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		try {
+			startingMesos = getMesos();
+			startingLevel = getLevel();
+		} catch (IOException e) {
+			botOutput("Error getting starting mesos/level");
 		}
 	}
 	public void enableSkill(String skillName) {
