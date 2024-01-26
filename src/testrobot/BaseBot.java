@@ -231,6 +231,7 @@ public abstract class BaseBot {
 	};
 	HashMap<String, AttackData> attacks = new HashMap<String, AttackData>();
 	int startingLevel;
+	int startingMesos;
 	long[] buffTimers = new long[buffs.length];
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
@@ -1152,22 +1153,17 @@ public abstract class BaseBot {
 	    System.out.println("[" + myObj + "] " + output);
 	}
 	public void exitScript() {
-//		robot.delay(4000);
-//		keyPress(KeyEvent.VK_K);
-//		robot.delay(400);
-//		keyPress(KeyEvent.VK_UP);
-//		robot.delay(400);
-//		keyPress(KeyEvent.VK_UP);
-//		robot.delay(400);
-//		keyPress(KeyEvent.VK_UP);
 		LocalTime now = LocalTime.now();
 		int level = 0;
+		int endingMesos = 0;
 		try {
 			level = getLevel();
+			endingMesos = getMesos();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		botOutput("Starting level: " + startingLevel + ", Ending Level: " + level);
+		botOutput("Starting mesos: " + startingMesos + ", Ending mesos: " + formatMesos(endingMesos));
 		botOutput("Script ran for " + MINUTES.between(startTime, now) + " minutes");
 		botOutput("Exiting script...");
 		System.exit(0);
