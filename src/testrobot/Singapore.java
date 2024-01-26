@@ -70,9 +70,9 @@ public class Singapore extends BaseBot{
 //				swapMapleScreen(getScreen(temp));
 //			}
 			position = movement(position, map);
-			MaplePoint newCoords = getMinimapPosition(map);
-			botOutput("Moved to position index: " + newCoords.toString());
-			robot.delay(200);
+//			MaplePoint newCoords = getMinimapPosition(map);
+//			botOutput("Moved to position index: " + newCoords.toString());
+			robot.delay(100);
 			attack(map);
 			feedPets();
 			currTime = System.currentTimeMillis();
