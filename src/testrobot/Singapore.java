@@ -2,12 +2,15 @@ package testrobot;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 public class Singapore extends BaseBot{
 	MinimapData gs2Dungeon = new MinimapData("gs2dungeon", new Rectangle(34,72,121,53), new Rectangle(47,45,135,15),"minimapNames/gs2dungeon.png");
@@ -223,21 +226,10 @@ public class Singapore extends BaseBot{
 		robot.delay(300);
 		robot.keyRelease(KeyEvent.VK_V);
 	}
-	public MaplePoint findInventory() throws IOException {
-		Rectangle inventorySearch = new Rectangle(850,50, 175, 650);
-		inventorySearch = adjustRectangle(mapleScreen, inventorySearch);
-		MaplePoint x = getCurrPosition(inventorySearch, "inventory/inventory.png");
-		if(x.x < 0) {
-			
-		} else {
-			//adjust
-			x.x = inventorySearch.x + x.x;
-			x.y = inventorySearch.y + x.y;
-		}
-		
-		return x;
-	}
+	
 	public void checkEquipment() throws IOException {
+		botOutput("===========");
+		botOutput("Starting Equip Checks");
 		MaplePoint invLoc = findInventory();
 		if(invLoc.x < 0) {
 			robot.keyPress(KeyEvent.VK_I);
@@ -245,7 +237,7 @@ public class Singapore extends BaseBot{
 			robot.delay(100);
 			invLoc = findInventory();
 			if(invLoc.x < 0) {
-				//inventory couldnt be found
+				botOutput("Couldnt find inventory! Is it in the right place?");
 				return;
 			}
 		}
@@ -266,15 +258,24 @@ public class Singapore extends BaseBot{
 		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
 		if(equipExists.x > 0) {
 			//inventory empty
+			botOutput("Equips not found, continuing");
+			botOutput("===========");
 		} else {
 			//inventory is full! initiate sell procedure
+			int init  = getMesos();
+			botOutput("Equips found, selling equips. starting mesos: " + formatMesos(init));
 			sellEquips();
+			int post = getMesos();
+			botOutput("After selling we gained " + (post-init) + " mesos. Ending mesos: " + formatMesos(post));
+			botOutput("===========");
 		}
 	}
 	
+	
+	
 	public void sellEquips() throws IOException {
 		int tries = 0;
-		while(checkMapMatch(cityMap).x < 0 && tries < 3) {
+		while(checkMapMatch(cityMap).x < 0 && tries < 5) {
 			robot.keyPress(KeyEvent.VK_J);
 			robot.keyRelease(KeyEvent.VK_J);
 			robot.delay(600);
@@ -283,18 +284,18 @@ public class Singapore extends BaseBot{
 			robot.delay(2000);
 			tries ++;
 		}
-		if(tries >= 3) {
+		if(tries >= 5 && checkMapMatch(cityMap).x < 0) {
 			//something went wrong
 			exitScript();
 		}
 		
 		MaplePoint pos = getMinimapPosition(cityMap);
-		System.out.println(pos.toString());
+//		System.out.println(pos.toString());
 		Zone sellZone = new Zone(new MaplePoint(98,27), new MaplePoint(100,80));
 		moveToZoneX(sellZone, cityMap);
 		robot.delay(2000);
-		MaplePoint invLoc = findInventory();
-		System.out.println(invLoc.toString());
+//		MaplePoint invLoc = findInventory();
+//		System.out.println(invLoc.toString());
 		MaplePoint sellerClick = new MaplePoint(335 + mapleScreen.x,690 + mapleScreen.y);
 		robot.mouseMove(sellerClick.x, sellerClick.y);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
@@ -330,7 +331,7 @@ public class Singapore extends BaseBot{
 		robot.keyPress(KeyEvent.VK_UP);
 		robot.keyRelease(KeyEvent.VK_UP);
 		robot.delay(2000);
-		System.out.println("done");
+		botOutput("Finished Selling items.");
 	}
 	public int ulu1(int position, MinimapData map) throws IOException {
 		MaplePoint pos = getMinimapPosition(map);

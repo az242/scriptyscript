@@ -234,6 +234,7 @@ public abstract class BaseBot {
 	long[] buffTimers = new long[buffs.length];
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
+	BufferedImage[] mesosNumImages;
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
 	public BaseBot(Robot robot, Screen[] screens) {
 		this.attacks.put("genesis", new AttackData(KeyEvent.VK_C, 2375, 2500));
@@ -262,6 +263,10 @@ public abstract class BaseBot {
 			e.printStackTrace();
 		}
 		try {
+			mesosNumImages = new BufferedImage[]{
+					ImageIO.read(new File("inventory/0.png")),ImageIO.read(new File("inventory/1.png")),ImageIO.read(new File("inventory/2.png"))
+					,ImageIO.read(new File("inventory/3.png")),ImageIO.read(new File("inventory/4.png")),ImageIO.read(new File("inventory/5.png")),
+					ImageIO.read(new File("inventory/6.png")),ImageIO.read(new File("inventory/7.png")),ImageIO.read(new File("inventory/8.png")),ImageIO.read(new File("inventory/9.png"))};
 			numImages = new BufferedImage[]{
 					ImageIO.read(new File("numbers/0.png")),ImageIO.read(new File("numbers/1.png")),ImageIO.read(new File("numbers/2.png"))
 					,ImageIO.read(new File("numbers/3.png")),ImageIO.read(new File("numbers/4.png")),ImageIO.read(new File("numbers/5.png")),
@@ -467,9 +472,23 @@ public abstract class BaseBot {
 				}
 			}
 		}
-//		File outputfile = new File("couldFind.png");
-//	    ImageIO.write(image, "png", outputfile);
+		File outputfile = new File("couldFind.png");
+	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
+	}
+	public MaplePoint findInventory() throws IOException {
+		Rectangle inventorySearch = new Rectangle(850,50, 175, 650);
+		inventorySearch = adjustRectangle(mapleScreen, inventorySearch);
+		MaplePoint x = getCurrPosition(inventorySearch, "inventory/inventory.png");
+		if(x.x < 0) {
+			
+		} else {
+			//adjust
+			x.x = inventorySearch.x + x.x;
+			x.y = inventorySearch.y + x.y;
+		}
+		
+		return x;
 	}
 	public int getHp() throws IOException {
 		int hp = 0;
@@ -503,6 +522,58 @@ public abstract class BaseBot {
 			level = (int) (level + findLevelNums.get(x)*Math.pow(10, findLevelNums.size()-x-1));
 		}
 		return level;
+	}
+	public int getMesos() throws IOException {
+		MaplePoint invLoc = findInventory();
+		Rectangle billionmesos = new Rectangle(36 + invLoc.x,259 + invLoc.y,20,9);
+		Rectangle millionmesos = new Rectangle(60 + invLoc.x,259 + invLoc.y,20,9);
+		Rectangle thousandmesos = new Rectangle(84 + invLoc.x,259 + invLoc.y,20,9);
+		Rectangle hundredmesos = new Rectangle(108 + invLoc.x,259 + invLoc.y,20,9);
+		ArrayList<Integer> list1 = findMesosNums(hundredmesos);
+		ArrayList<Integer> list2 = findMesosNums(thousandmesos);
+		ArrayList<Integer> list3 = findMesosNums(millionmesos);
+		ArrayList<Integer> list4 = findMesosNums(billionmesos);
+		ArrayList<Integer> combinedList = new ArrayList<>();
+		combinedList.addAll(list4);
+		combinedList.addAll(list3);
+		combinedList.addAll(list2);
+		combinedList.addAll(list1);
+        
+		int total = 0;
+		for (Integer i : combinedList) {
+            total = 10 * total + i;
+        }
+		return total;
+	}
+	public String formatMesos(int number) {
+		return String.format("%,d", number);
+	}
+	public ArrayList<Integer> findMesosNums(Rectangle rect) throws IOException {
+		BufferedImage image = robot.createScreenCapture(rect);
+		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
+		for(int x = 0; x < 3; x++) {
+			int numoffset = 0;
+			for(int i=0;i<mesosNumImages.length;i++) {
+				boolean match = true;
+				imageLoop:
+				for(int x2=0;x2<mesosNumImages[i].getWidth();x2++) {
+					for(int y2=0;y2<mesosNumImages[i].getHeight();y2++) {
+						Color pic1 = new Color(mesosNumImages[i].getRGB(x2, y2));
+						if(pic1.getRed() != 255 && pic1.getBlue() != 255 && pic1.getGreen() != 255) {
+							if(mesosNumImages[i].getRGB(x2, y2) != image.getRGB((x*7)+x2+numoffset, y2)) {
+								match = false;
+								break imageLoop;
+							}
+						}
+					}
+				}
+				if(match) {
+					numbersFound.add(i);
+					break;
+				}
+			}
+		}
+		return numbersFound;
 	}
 	public ArrayList<Integer> findLevelNums(Rectangle rect) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
@@ -582,39 +653,29 @@ public abstract class BaseBot {
 	}
 	public ArrayList<Integer> findNums(Rectangle rect) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
-		boolean imageMatched = true;
-		boolean addNum = false;
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
 		int currNumX = 0;
 		int numToAdd = 0;
 		for(int k=0;k<5;k++) {
 			numToAdd = 0;
 			for(int i=0;i<numImages.length;i++) {
-				imageMatched = true;
+				boolean match = true;
+				bp1:
 				for(int x2=0;x2<numImages[i].getWidth();x2++) {
 					for(int y2=0;y2<numImages[i].getHeight();y2++) {
 						Color pic1 = new Color(numImages[i].getRGB(x2, y2));
 						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
 							if(numImages[i].getRGB(x2, y2) != image.getRGB(currNumX+x2, y2)) {
-								imageMatched = false;
-								break;
+								match = false;
+								break bp1;
 							}
 						}
 					}
-					if(!imageMatched) {
-						break;
-					}
 				}
-				if(imageMatched) {
-					numToAdd = i;
-					addNum = true;
+				if(match) {
+					numbersFound.add(numToAdd);
+					break;
 				}
-			}
-			if(addNum) {
-				numbersFound.add(numToAdd);
-				addNum=false;
-			}else {
-				break;
 			}
 			currNumX = currNumX + 6;
 		}
