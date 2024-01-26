@@ -249,30 +249,23 @@ public class Singapore extends BaseBot{
 				return;
 			}
 		}
-		System.out.println(invLoc.toString());
+//		System.out.println(invLoc.toString());
 		MaplePoint EquipButton = new MaplePoint(10 + invLoc.x,25 + invLoc.y);
 		robot.mouseMove(EquipButton.x, EquipButton.y);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-		
-		
 		robot.delay(100);
+		
 		MaplePoint scrollbarLocation = new MaplePoint(155 + invLoc.x,220 + invLoc.y);
 		robot.mouseMove(scrollbarLocation.x, scrollbarLocation.y);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-		robot.delay(1000);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 		robot.delay(100);
-		
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+//		
 		Rectangle equipfullsearch = new Rectangle(106 + invLoc.x ,209 + invLoc.y,34,34);
 		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
 		if(equipExists.x > 0) {
-			//inventory empty close it
-			robot.keyPress(KeyEvent.VK_I);
-			robot.keyRelease(KeyEvent.VK_I);
-			robot.delay(100);
+			//inventory empty
 		} else {
 			//inventory is full! initiate sell procedure
 			sellEquips();
@@ -280,13 +273,19 @@ public class Singapore extends BaseBot{
 	}
 	
 	public void sellEquips() throws IOException {
-		while(checkMapMatch(cityMap).x < 0) {
+		int tries = 0;
+		while(checkMapMatch(cityMap).x < 0 && tries < 3) {
 			robot.keyPress(KeyEvent.VK_J);
 			robot.keyRelease(KeyEvent.VK_J);
 			robot.delay(600);
 			robot.keyPress(KeyEvent.VK_UP);
 			robot.keyRelease(KeyEvent.VK_UP);
 			robot.delay(2000);
+			tries ++;
+		}
+		if(tries >= 3) {
+			//something went wrong
+			exitScript();
 		}
 		
 		MaplePoint pos = getMinimapPosition(cityMap);
@@ -316,7 +315,7 @@ public class Singapore extends BaseBot{
 		while(equipExists.x < 0) {
 			robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 			robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-			robot.delay(200);
+			robot.delay(75);
 			equipExists = getCurrPosition(equipsearch, "inventory/storeEmptySlot.png");
 			robot.keyPress(KeyEvent.VK_Y);
 		}
