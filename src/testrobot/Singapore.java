@@ -229,8 +229,7 @@ public class Singapore extends BaseBot{
 	}
 	
 	public void checkEquipment() throws IOException {
-		botOutput("===========");
-		botOutput("Starting Equip Checks");
+		
 		MaplePoint invLoc = findInventory();
 		if(invLoc.x < 0) {
 			robot.keyPress(KeyEvent.VK_I);
@@ -238,7 +237,9 @@ public class Singapore extends BaseBot{
 			robot.delay(100);
 			invLoc = findInventory();
 			if(invLoc.x < 0) {
+				botOutput("===========");
 				botOutput("Couldnt find inventory! Is it in the right place?");
+				botOutput("===========");
 				return;
 			}
 		}
@@ -259,15 +260,16 @@ public class Singapore extends BaseBot{
 		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
 		if(equipExists.x > 0) {
 			//inventory empty
-			botOutput("Equips not found, continuing");
-			botOutput("===========");
+//			botOutput("Equips not found, continuing");
+//			botOutput("===========");
 		} else {
+			botOutput("===========");
 			//inventory is full! initiate sell procedure
 			int init  = getMesos();
 			botOutput("Equips found, selling equips. starting mesos: " + formatMesos(init));
 			sellEquips();
 			int post = getMesos();
-			botOutput("After selling we gained " + (post-init) + " mesos. Ending mesos: " + formatMesos(post));
+			botOutput("After selling we gained " + formatMesos(post-init) + " mesos. Ending mesos: " + formatMesos(post));
 			botOutput("===========");
 		}
 	}
