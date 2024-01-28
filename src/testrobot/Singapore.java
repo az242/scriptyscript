@@ -58,6 +58,7 @@ public class Singapore extends BaseBot{
 		long startTime = System.currentTimeMillis();
 		rebuff(.75);
 		int minutes = 0;
+		checkEquipment();
 		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			checkPots();
 //			if(getScreen("sweeper")!= null && sweeperTimer + 33*1000 < currTime) {
@@ -72,7 +73,7 @@ public class Singapore extends BaseBot{
 			position = movement(position, map);
 //			MaplePoint newCoords = getMinimapPosition(map);
 //			botOutput("Moved to position index: " + newCoords.toString());
-			robot.delay(100);
+			robot.delay(200);
 			attack(map);
 			feedPets();
 			currTime = System.currentTimeMillis();
@@ -80,7 +81,7 @@ public class Singapore extends BaseBot{
 			if(MINUTES.between(this.startTime, now) > minutes ) {
 				minutes = (int) MINUTES.between(this.startTime, now);
 				botOutput("Script ran for " + minutes + " minutes");
-				checkEquipment();
+				
 			}
 			
 		}
@@ -303,7 +304,7 @@ public class Singapore extends BaseBot{
 		robot.mouseMove(sellerClick.x, sellerClick.y);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-		robot.delay(200);
+		robot.delay(1000);
 		
 		MaplePoint initSell = new MaplePoint(560 + mapleScreen.x, 350 + mapleScreen.y);
 		robot.mouseMove(initSell.x, initSell.y);
@@ -370,7 +371,7 @@ public class Singapore extends BaseBot{
 		return 0;
 	}
 	public int ulu2(int position, MinimapData map) throws IOException {
-		Zone attack1 = new Zone(new MaplePoint(30,27), new MaplePoint(37,66));
+		Zone attack1 = new Zone(new MaplePoint(26,27), new MaplePoint(35,66));
 		Zone attack2 = new Zone(new MaplePoint(67,27), new MaplePoint(75,66));
 		Zone attack3 = new Zone(new MaplePoint(97,27), new MaplePoint(112,66));
 		Zone attack2Top = new Zone(new MaplePoint(58,27), new MaplePoint(65,66));
@@ -399,6 +400,7 @@ public class Singapore extends BaseBot{
 			telecastAttackMove(attacks.get("genesis"),attack2, map);
 			if(offset >=5) {
 				offset = 0;
+				checkEquipment();
 			}
 			return position + 1;
 		case 2:
@@ -409,7 +411,7 @@ public class Singapore extends BaseBot{
 			if(offset >= 5) {
 				botOutput("Starting sweep rotation.");
 				climbRope(rope,checkZone, map);
-				telecastAttackMove(attacks.get("genesis"),attack3Top, map);
+				moveToZoneX(attack3Top, map);
 				robot.keyPress(KeyEvent.VK_SPACE);
 				robot.keyRelease(KeyEvent.VK_SPACE);
 				robot.delay(800);

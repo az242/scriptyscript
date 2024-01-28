@@ -226,7 +226,7 @@ public abstract class BaseBot {
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
-			new BuffData("Maple Warrior", 300, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
+			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
 			new BuffData("Magic", 800, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	HashMap<String, AttackData> attacks = new HashMap<String, AttackData>();
@@ -285,6 +285,8 @@ public abstract class BaseBot {
 		try {
 			startingMesos = getMesos();
 			startingLevel = getLevel();
+			botOutput("Starting level: " + startingLevel);
+			botOutput("Starting mesos: " + startingMesos);
 		} catch (IOException e) {
 			botOutput("Error getting starting mesos/level");
 		}
@@ -662,18 +664,15 @@ public abstract class BaseBot {
 	public ArrayList<Integer> findNums(Rectangle rect) throws IOException {
 		BufferedImage image = robot.createScreenCapture(rect);
 		ArrayList<Integer> numbersFound = new ArrayList<Integer>();
-		int currNumX = 0;
-		int numToAdd = 0;
 		for(int k=0;k<5;k++) {
-			numToAdd = 0;
-			for(int i=0;i<numImages.length;i++) {
+			for(int i=numImages.length-1;i>=0;i--) {
 				boolean match = true;
 				bp1:
 				for(int x2=0;x2<numImages[i].getWidth();x2++) {
 					for(int y2=0;y2<numImages[i].getHeight();y2++) {
 						Color pic1 = new Color(numImages[i].getRGB(x2, y2));
 						if(pic1.getRed() == 255 && pic1.getBlue() == 255 && pic1.getGreen() == 255) {
-							if(numImages[i].getRGB(x2, y2) != image.getRGB(currNumX+x2, y2)) {
+							if(numImages[i].getRGB(x2, y2) != image.getRGB(x2 + (k*6), y2)) {
 								match = false;
 								break bp1;
 							}
@@ -681,11 +680,10 @@ public abstract class BaseBot {
 					}
 				}
 				if(match) {
-					numbersFound.add(numToAdd);
+					numbersFound.add(i);
 					break;
 				}
 			}
-			currNumX = currNumX + 6;
 		}
 		return numbersFound;
 	}

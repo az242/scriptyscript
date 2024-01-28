@@ -170,11 +170,7 @@ public class Leafre extends BaseBot{
 	public void attackInZone(Zone attackZone, MinimapData map) throws IOException{
 		moveToZoneX(attackZone,map);
 		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2750, 3000);
-		waitOnChat();
-		attack(1,KeyEvent.VK_V, 615);
-		moveToZoneX(attackZone,map);
-		waitOnChat();
-		attack(1, KeyEvent.VK_C, 2750, 3000);
+//		attack(1, KeyEvent.VK_C, 2750, 2000);
+		attack(attacks.get("genesis"), 1);
 	}
 }
