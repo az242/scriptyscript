@@ -24,15 +24,6 @@ public class runner {
 //			bot.enableSkill("Hermit Pot");
 			bot.swapMapleScreen(bot.getScreen("bishop"));
 			bot.leech(8, bot.getMap("skele2"));
-//			bot.sellEquips();
-//			MaplePoint pos = bot.getMinimapPosition(((Leafre)bot).skele2);
-//			System.out.println(bot.formatMesos(bot.getMesos()));
-//			LocalTime now = LocalTime.now();
-//			System.out.println(pos);
-//			Zone leftRope = new Zone(10,55,10,71);
-//			Zone checkZoneleft = new Zone(5,50,15,56);
-//			bot.climbRope(leftRope, checkZoneleft, ((Leafre)bot).skele2);
-//			((Singapore) bot).getMesos();
 //			bot.rebuff(.5);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
