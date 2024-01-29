@@ -216,4 +216,10 @@ public class Zipangu extends BaseBot{
 		}
 		return 0;
 	}
+
+	@Override
+	public void sellEquips() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

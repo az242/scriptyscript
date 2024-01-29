@@ -229,54 +229,6 @@ public class Singapore extends BaseBot{
 		robot.keyRelease(KeyEvent.VK_V);
 	}
 	
-	public void checkEquipment() throws IOException {
-		
-		MaplePoint invLoc = findInventory();
-		if(invLoc.x < 0) {
-			robot.keyPress(KeyEvent.VK_I);
-			robot.keyRelease(KeyEvent.VK_I);
-			robot.delay(100);
-			invLoc = findInventory();
-			if(invLoc.x < 0) {
-				botOutput("===========");
-				botOutput("Couldnt find inventory! Is it in the right place?");
-				botOutput("===========");
-				return;
-			}
-		}
-//		System.out.println(invLoc.toString());
-		MaplePoint EquipButton = new MaplePoint(10 + invLoc.x,25 + invLoc.y);
-		robot.mouseMove(EquipButton.x, EquipButton.y);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-		robot.delay(100);
-		
-		MaplePoint scrollbarLocation = new MaplePoint(155 + invLoc.x,220 + invLoc.y);
-		robot.mouseMove(scrollbarLocation.x, scrollbarLocation.y);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		robot.delay(100);
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-//		
-		Rectangle equipfullsearch = new Rectangle(106 + invLoc.x ,209 + invLoc.y,34,34);
-		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
-		if(equipExists.x > 0) {
-			//inventory empty
-//			botOutput("Equips not found, continuing");
-//			botOutput("===========");
-		} else {
-			botOutput("===========");
-			//inventory is full! initiate sell procedure
-			int init  = getMesos();
-			botOutput("Equips found, selling equips. starting mesos: " + formatMesos(init));
-			sellEquips();
-			int post = getMesos();
-			botOutput("After selling we gained " + formatMesos(post-init) + " mesos. Ending mesos: " + formatMesos(post));
-			botOutput("===========");
-		}
-	}
-	
-	
-	
 	public void sellEquips() throws IOException {
 		int tries = 0;
 		while(checkMapMatch(cityMap).x < 0 && tries < 5) {
@@ -293,7 +245,7 @@ public class Singapore extends BaseBot{
 			exitScript();
 		}
 		
-		MaplePoint pos = getMinimapPosition(cityMap);
+//		MaplePoint pos = getMinimapPosition(cityMap);
 //		System.out.println(pos.toString());
 		Zone sellZone = new Zone(new MaplePoint(98,27), new MaplePoint(100,80));
 		moveToZoneX(sellZone, cityMap);

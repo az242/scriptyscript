@@ -129,4 +129,9 @@ public class NLC extends BaseBot{
 		}
 		return 9;
 	}
+	@Override
+	public void sellEquips() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

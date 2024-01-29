@@ -88,9 +88,9 @@ class Zone {
 		this.lowerRightBound = lowerRightBound;
 		this.ignoreY = false;
 	}
-	public Zone(int upper, int left, int lower, int right) {
-		this.upperLeftBound = new MaplePoint(upper,left);
-		this.lowerRightBound = new MaplePoint(lower,right);
+	public Zone(int x1, int y1, int x2, int y2) {
+		this.upperLeftBound = new MaplePoint(x1,y1);
+		this.lowerRightBound = new MaplePoint(x2,y2);
 	}
 	public int getLeftBound(){
 		return upperLeftBound.x;
@@ -770,6 +770,13 @@ public abstract class BaseBot {
 		robot.delay(300);
 //		System.out.println("finished portal");
 	}
+	/**
+	 * 
+	 * @param rope 		The zone of the rope itself (left and right MUST be same)
+	 * @param checkZone The zone where we want to end up after climbing the rope
+	 * @param map		The map we check
+	 * @throws IOException
+	 */
 	public void climbRope(Zone rope, Zone checkZone, MinimapData map) throws IOException {
 		Zone jumpZone = new Zone(new MaplePoint(rope.getLeftBound()-5, rope.getTopBound()),new MaplePoint(rope.getLeftBound()+5, rope.getBottomBound()));
 		MaplePoint pos = getMinimapPosition(map);
@@ -784,18 +791,13 @@ public abstract class BaseBot {
 					robot.keyPress(KeyEvent.VK_SPACE);
 					robot.keyRelease(KeyEvent.VK_LEFT);
 					robot.keyRelease(KeyEvent.VK_SPACE);
-				} else if(pos.x < rope.getLeftBound()) {
+				} else if(pos.x <= rope.getLeftBound()) {
 					robot.keyPress(KeyEvent.VK_RIGHT);
 					robot.keyPress(KeyEvent.VK_UP);
 					robot.delay(100);
 					robot.keyPress(KeyEvent.VK_SPACE);
 					robot.keyRelease(KeyEvent.VK_RIGHT);
 					robot.keyRelease(KeyEvent.VK_SPACE);
-				} else {
-					robot.keyPress(KeyEvent.VK_SPACE);
-					robot.delay(50);
-					robot.keyRelease(KeyEvent.VK_SPACE);
-					robot.keyPress(KeyEvent.VK_UP);
 				}
 			} else {
 				moveToZoneX(rope, map);
@@ -975,19 +977,43 @@ public abstract class BaseBot {
 		robot.keyRelease(attack.key);
 	}
 	public void telecastAttackMove(AttackData attack, Zone zone, MinimapData map) throws IOException{
+		telecastAttackMove(attack,zone, map, true);
+	}
+	public void telecastAttackMove(AttackData attack, Zone zone, MinimapData map, boolean ignoreY) throws IOException{
 		waitOnChat();
-		MaplePoint tempCoords = getMinimapPosition(map);
-		if(tempCoords.x < zone.getLeftBound()) {
-			robot.keyPress(KeyEvent.VK_RIGHT);
+		int originalMp = 0;
+		long startTime = 0;
+		if(attack.manaCost != 0) {
+			
+		}
+		robot.keyPress(KeyEvent.VK_UP);
+		if(attack.manaCost != 0) {
+			originalMp = getMp();
+			int newMp = getMp();
+			while(Math.abs(originalMp-newMp) < attack.manaCost) {
+				robot.keyPress(KeyEvent.VK_ALT);
+				robot.keyRelease(KeyEvent.VK_ALT);
+				robot.keyPress(attack.key);
+				startTime = System.currentTimeMillis();
+				robot.keyRelease(attack.key);
+				robot.delay(300);
+				newMp = getMp();
+				robot.delay(300);
+			}
+		} else {
 			robot.keyPress(KeyEvent.VK_ALT);
 			robot.keyRelease(KeyEvent.VK_ALT);
 			robot.keyPress(attack.key);
-			long startTime = System.currentTimeMillis();
+			startTime = System.currentTimeMillis();
 			robot.keyRelease(attack.key);
-			
+		}
+		robot.keyRelease(KeyEvent.VK_UP);
+		MaplePoint tempCoords = getMinimapPosition(map);
+		if(tempCoords.x < zone.getLeftBound()) {
+			robot.keyPress(KeyEvent.VK_RIGHT);
 			while(tempCoords.x < zone.getLeftBound()) {
-				if(tempCoords.x + 11 < zone.getRightBound()){
-					robot.delay(100);
+				if(tempCoords.x + 10 < zone.getRightBound()){
+					robot.delay(200);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.keyRelease(KeyEvent.VK_ALT);
 				} else {
@@ -996,21 +1022,33 @@ public abstract class BaseBot {
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_RIGHT);
-			long endTime = System.currentTimeMillis();
-			while(endTime - startTime < attack.delay) {
-				robot.delay(50);
-				endTime = System.currentTimeMillis();
+			if(!ignoreY) {
+				if(tempCoords.y > zone.getBottomBound()) {
+					robot.keyPress(KeyEvent.VK_UP);
+					while(tempCoords.y > zone.getBottomBound()) {
+						robot.delay(200);
+						robot.keyPress(KeyEvent.VK_ALT);
+						robot.keyRelease(KeyEvent.VK_ALT);
+						tempCoords = getMinimapPosition(map);
+					}
+					robot.keyRelease(KeyEvent.VK_UP);
+				} else if(tempCoords.y < zone.getTopBound()) {
+					robot.keyPress(KeyEvent.VK_DOWN);
+					while(tempCoords.y < zone.getTopBound()) {
+						robot.delay(200);
+						robot.keyPress(KeyEvent.VK_ALT);
+						robot.keyRelease(KeyEvent.VK_ALT);
+						tempCoords = getMinimapPosition(map);
+					}
+					robot.keyRelease(KeyEvent.VK_DOWN);
+				}
+				robot.delay(300);
 			}
 		} else if(tempCoords.x > zone.getRightBound()) {
 			robot.keyPress(KeyEvent.VK_LEFT);
-			robot.keyPress(KeyEvent.VK_ALT);
-			robot.keyRelease(KeyEvent.VK_ALT);
-			robot.keyPress(attack.key);
-			long startTime = System.currentTimeMillis();
-			robot.keyRelease(attack.key);
 			while(tempCoords.x > zone.getRightBound()) {
-				if(tempCoords.x - 11 > zone.getLeftBound()){
-					robot.delay(100);
+				if(tempCoords.x - 10 > zone.getLeftBound()){
+					robot.delay(200);
 					robot.keyPress(KeyEvent.VK_ALT);
 					robot.keyRelease(KeyEvent.VK_ALT);
 				} else {
@@ -1019,22 +1057,82 @@ public abstract class BaseBot {
 				tempCoords = getMinimapPosition(map);
 			}
 			robot.keyRelease(KeyEvent.VK_LEFT);
-			long endTime = System.currentTimeMillis();
-			while(endTime - startTime < attack.delay) {
-				robot.delay(50);
-				endTime = System.currentTimeMillis();
+			if(!ignoreY) {
+				if(tempCoords.y > zone.getBottomBound()) {
+					robot.keyPress(KeyEvent.VK_UP);
+					while(tempCoords.y > zone.getBottomBound()) {
+						robot.delay(200);
+						robot.keyPress(KeyEvent.VK_ALT);
+						robot.keyRelease(KeyEvent.VK_ALT);
+						tempCoords = getMinimapPosition(map);
+					}
+					robot.keyRelease(KeyEvent.VK_UP);
+				} else if(tempCoords.y < zone.getTopBound()) {
+					robot.keyPress(KeyEvent.VK_DOWN);
+					while(tempCoords.y < zone.getTopBound()) {
+						robot.delay(200);
+						robot.keyPress(KeyEvent.VK_ALT);
+						robot.keyRelease(KeyEvent.VK_ALT);
+						tempCoords = getMinimapPosition(map);
+					}
+					robot.keyRelease(KeyEvent.VK_DOWN);
+				}
+				robot.delay(300);
 			}
-		} else {
-			robot.keyPress(attack.key);
-			long startTime = System.currentTimeMillis();
-			robot.keyRelease(attack.key);
-			long endTime = System.currentTimeMillis();
-			while(endTime - startTime < attack.delay) {
-				robot.delay(50);
-				endTime = System.currentTimeMillis();
-			}
+			
+		}
+		long endTime = System.currentTimeMillis();
+		while(endTime - startTime < attack.delay) {
+			robot.delay(50);
+			endTime = System.currentTimeMillis();
 		}
 	}
+	public void checkEquipment() throws IOException {
+		MaplePoint invLoc = findInventory();
+		if(invLoc.x < 0) {
+			robot.keyPress(KeyEvent.VK_I);
+			robot.keyRelease(KeyEvent.VK_I);
+			robot.delay(100);
+			invLoc = findInventory();
+			if(invLoc.x < 0) {
+				botOutput("===========");
+				botOutput("Couldnt find inventory! Is it in the right place?");
+				botOutput("===========");
+				return;
+			}
+		}
+//		System.out.println(invLoc.toString());
+		MaplePoint EquipButton = new MaplePoint(10 + invLoc.x,25 + invLoc.y);
+		robot.mouseMove(EquipButton.x, EquipButton.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(100);
+		
+		MaplePoint scrollbarLocation = new MaplePoint(155 + invLoc.x,220 + invLoc.y);
+		robot.mouseMove(scrollbarLocation.x, scrollbarLocation.y);
+		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		robot.delay(100);
+		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+//		
+		Rectangle equipfullsearch = new Rectangle(106 + invLoc.x ,209 + invLoc.y,34,34);
+		MaplePoint equipExists = getCurrPosition(equipfullsearch, "inventory/emptyslot.png");
+		if(equipExists.x > 0) {
+			//inventory empty
+//			botOutput("Equips not found, continuing");
+//			botOutput("===========");
+		} else {
+			botOutput("===========");
+			//inventory is full! initiate sell procedure
+			int init  = getMesos();
+			botOutput("Equips found, selling equips. starting mesos: " + formatMesos(init));
+			sellEquips();
+			int post = getMesos();
+			botOutput("After selling we gained " + formatMesos(post-init) + " mesos. Ending mesos: " + formatMesos(post));
+			botOutput("===========");
+		}
+	}
+	public abstract void sellEquips() throws IOException;
+	
 	public void moveToZoneXAttack(Zone zone, MinimapData map, int attackKey) throws IOException {
 		MaplePoint tempCoords = getMinimapPosition(map);
 		if(tempCoords.x < zone.getLeftBound()) {
