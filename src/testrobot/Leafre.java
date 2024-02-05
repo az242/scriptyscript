@@ -100,7 +100,20 @@ public class Leafre extends BaseBot{
 				//telecast to prejump and get to postRope
 				telecastAttackMove(attacks.get("genesis"),preJump, map);
 				climbRope(leftRope, checkZoneleft, map);
-				moveToPlatform(postRope, map);
+//				moveToPlatform(postRope, map);
+				MaplePoint pos = getMinimapPosition(map);
+				while(!postRope.isInYZone(pos) || !postRope.isInXZone(pos)) {
+					moveToZoneX(postRope, map);
+					pos = getMinimapPosition(map);
+					if(pos.y > leftRope.getTopBound()) {
+						climbRope(leftRope, checkZoneleft, map);
+					} else if (pos.y > postRope.getBottomBound()) {
+						teleportUp();
+					} else if (pos.y < postRope.getTopBound()){
+						jumpDown();
+					}
+					pos = getMinimapPosition(map);
+				}
 				robot.delay(200);
 				break;
 			case 3:
@@ -111,7 +124,6 @@ public class Leafre extends BaseBot{
 				break;
 			case 4:
 				telecastAttackMove(attacks.get("genesis"),jumpDown, map);
-				moveToPlatform(postJump, map);
 				MaplePoint pos = getMinimapPosition(map);
 				while(!postJump.isInYZone(pos) || !postJump.isInXZone(pos)) {
 					moveToZoneX(postJump, map);
