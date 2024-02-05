@@ -112,6 +112,18 @@ public class Leafre extends BaseBot{
 			case 4:
 				telecastAttackMove(attacks.get("genesis"),jumpDown, map);
 				moveToPlatform(postJump, map);
+				MaplePoint pos = getMinimapPosition(map);
+				while(!postJump.isInYZone(pos) || !postJump.isInXZone(pos)) {
+					moveToZoneX(postJump, map);
+					pos = getMinimapPosition(map);
+					if(pos.y > postJump.getBottomBound()) {
+						//we dropped too far, get back up
+						climbRope(leftRope, checkZoneleft, map);
+					} else if (pos.y < postJump.getTopBound()){
+						jumpDown();
+					}
+					pos = getMinimapPosition(map);
+				}
 				checkEquipment();
 				return 0;
 		}

@@ -1042,6 +1042,7 @@ public abstract class BaseBot {
 					}
 					robot.keyRelease(KeyEvent.VK_DOWN);
 				}
+				moveToZoneX(zone,map);
 				robot.delay(300);
 			}
 		} else if(tempCoords.x > zone.getRightBound()) {
@@ -1077,6 +1078,7 @@ public abstract class BaseBot {
 					}
 					robot.keyRelease(KeyEvent.VK_DOWN);
 				}
+				moveToZoneX(zone,map);
 				robot.delay(300);
 			}
 			
