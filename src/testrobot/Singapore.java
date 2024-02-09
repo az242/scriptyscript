@@ -335,7 +335,7 @@ public class Singapore extends BaseBot{
 //		botOutput("Offset: " + offset);
 		switch(position) {
 		case 0:
-			telecastAttackMove(attacks.get("genesis"),attack1, map);
+			telecastAttackMoveSafe(attacks.get("genesis"),attack1, map);
 			rebuff(.8);
 			while(pos.y < 58) {
 				jumpDown();
@@ -349,14 +349,14 @@ public class Singapore extends BaseBot{
 				jumpDown();
 				pos = getMinimapPosition(map);
 			}
-			telecastAttackMove(attacks.get("genesis"),attack2, map);
+			telecastAttackMoveSafe(attacks.get("genesis"),attack2, map);
 			if(offset >=5) {
 				offset = 0;
 				checkEquipment();
 			}
 			return position + 1;
 		case 2:
-			telecastAttackMove(attacks.get("genesis"),attack3, map);
+			telecastAttackMoveSafe(attacks.get("genesis"),attack3, map);
 			return position + 1;
 		case 3:
 			offset++;
@@ -369,12 +369,12 @@ public class Singapore extends BaseBot{
 				robot.delay(800);
 				return position + 1;
 			} else {
-				telecastAttackMove(attacks.get("genesis"),attack2, map);
+				telecastAttackMoveSafe(attacks.get("genesis"),attack2, map);
 				return 0;
 			  }
 		case 4:
 			if(offset >= 5) {
-				telecastAttackMove(attacks.get("genesis"),attack2Top, map);
+				telecastAttackMoveSafe(attacks.get("genesis"),attack2Top, map);
 				robot.keyPress(KeyEvent.VK_SPACE);
 				robot.keyRelease(KeyEvent.VK_SPACE);
 				robot.delay(800);
@@ -385,7 +385,7 @@ public class Singapore extends BaseBot{
 			return position + 1;
 		case 5:
 			
-			telecastAttackMove(attacks.get("genesis"),attack1, map);
+			telecastAttackMoveSafe(attacks.get("genesis"),attack1, map);
 			rebuff(.9);
 			return 1;
 			

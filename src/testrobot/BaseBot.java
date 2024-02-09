@@ -227,7 +227,7 @@ public abstract class BaseBot {
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
 			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
-			new BuffData("Magic", 800, KeyEvent.VK_DELETE,500,"bishop")
+			new BuffData("Magic", 1800, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	HashMap<String, AttackData> attacks = new HashMap<String, AttackData>();
 	int startingLevel;
@@ -750,7 +750,7 @@ public abstract class BaseBot {
 				robot.keyPress(KeyEvent.VK_RIGHT);
 				while(tempCoords.x <= portal.getLeftBound() && !checkZone.isInZone(tempCoords)) {
 					robot.keyPress(KeyEvent.VK_UP);
-					robot.delay(50);
+					robot.delay(100);
 					tempCoords = getMinimapPosition(map);
 				}
 				robot.keyRelease(KeyEvent.VK_RIGHT);
@@ -758,7 +758,7 @@ public abstract class BaseBot {
 				robot.keyPress(KeyEvent.VK_LEFT);
 				while(tempCoords.x >= portal.getRightBound()  && !checkZone.isInZone(tempCoords)) {
 					robot.keyPress(KeyEvent.VK_UP);
-					robot.delay(50);
+					robot.delay(100);
 					tempCoords = getMinimapPosition(map);
 				}
 				robot.keyRelease(KeyEvent.VK_LEFT);
@@ -984,7 +984,7 @@ public abstract class BaseBot {
 		int originalMp = 0;
 		long startTime = 0;
 		if(attack.manaCost != 0) {
-			
+			originalMp = getMp();
 		}
 		robot.keyPress(KeyEvent.VK_UP);
 		if(attack.manaCost != 0) {
@@ -998,7 +998,7 @@ public abstract class BaseBot {
 				robot.keyRelease(attack.key);
 				robot.delay(300);
 				newMp = getMp();
-				robot.delay(300);
+				robot.delay(50);
 			}
 		} else {
 			robot.keyPress(KeyEvent.VK_ALT);
@@ -1082,6 +1082,99 @@ public abstract class BaseBot {
 				robot.delay(300);
 			}
 			
+		}
+		long endTime = System.currentTimeMillis();
+		while(endTime - startTime < attack.delay) {
+			robot.delay(50);
+			endTime = System.currentTimeMillis();
+		}
+	}
+	public void telecastAttackMoveSafe(AttackData attack, Zone zone, MinimapData map) throws IOException{
+		waitOnChat();
+		int originalMp = 0;
+		long startTime = 0;
+		if(attack.manaCost != 0) {
+			originalMp = getMp();
+		}
+		MaplePoint tempCoords = getMinimapPosition(map);
+		if(tempCoords.x < zone.getLeftBound()) {
+			robot.keyPress(KeyEvent.VK_RIGHT);
+			if(attack.manaCost != 0) {
+				originalMp = getMp();
+				int newMp = getMp();
+				while(Math.abs(originalMp-newMp) < attack.manaCost) {
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+					robot.keyPress(attack.key);
+					startTime = System.currentTimeMillis();
+					robot.keyRelease(attack.key);
+					robot.delay(300);
+					newMp = getMp();
+					robot.delay(50);
+				}
+			} else {
+				robot.keyPress(KeyEvent.VK_ALT);
+				robot.keyRelease(KeyEvent.VK_ALT);
+				robot.keyPress(attack.key);
+				startTime = System.currentTimeMillis();
+				robot.keyRelease(attack.key);
+			}
+			while(tempCoords.x < zone.getLeftBound()) {
+				if(tempCoords.x + 10 < zone.getRightBound()){
+					robot.delay(200);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_RIGHT);
+		} else if(tempCoords.x > zone.getRightBound()) {
+			robot.keyPress(KeyEvent.VK_LEFT);
+			if(attack.manaCost != 0) {
+				originalMp = getMp();
+				int newMp = getMp();
+				while(Math.abs(originalMp-newMp) < attack.manaCost) {
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+					robot.keyPress(attack.key);
+					startTime = System.currentTimeMillis();
+					robot.keyRelease(attack.key);
+					robot.delay(300);
+					newMp = getMp();
+					robot.delay(50);
+				}
+			} else {
+				robot.keyPress(KeyEvent.VK_ALT);
+				robot.keyRelease(KeyEvent.VK_ALT);
+				robot.keyPress(attack.key);
+				startTime = System.currentTimeMillis();
+				robot.keyRelease(attack.key);
+			}
+			while(tempCoords.x > zone.getRightBound()) {
+				if(tempCoords.x - 10 > zone.getLeftBound()){
+					robot.delay(200);
+					robot.keyPress(KeyEvent.VK_ALT);
+					robot.keyRelease(KeyEvent.VK_ALT);
+				} else {
+					robot.delay(35);
+				}
+				tempCoords = getMinimapPosition(map);
+			}
+			robot.keyRelease(KeyEvent.VK_LEFT);
+			
+		} else {
+			originalMp = getMp();
+			int newMp = getMp();
+			while(Math.abs(originalMp-newMp) < attack.manaCost) {
+				robot.keyPress(attack.key);
+				startTime = System.currentTimeMillis();
+				robot.keyRelease(attack.key);
+				robot.delay(300);
+				newMp = getMp();
+				robot.delay(50);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		while(endTime - startTime < attack.delay) {

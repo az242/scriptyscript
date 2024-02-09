@@ -186,29 +186,25 @@ public class Victoria extends BaseBot{
 	public int wraithMovement(int position, MinimapData map) throws IOException {
 		MaplePoint pos = getMinimapPosition(map);
 		switch(position){
-		case 7:
 		case 0:
 			Zone att1 = new Zone(new MaplePoint(68,41), new MaplePoint(69,44));
 			moveToPlatform(att1, map);
 			if(position == 7 ) 
 				return 0;
  			return position + 1;
-		case 6:
 		case 1:
 			Zone att2 = new Zone(new MaplePoint(110,39), new MaplePoint(113,44));
 			moveToPlatform(att2, map);
 			return position + 1;
-		case 5:
 		case 2:
 			Zone att3 = new Zone(new MaplePoint(136,39), new MaplePoint(137,44));
 			moveToPlatform(att3, map);
 			return position + 1;
-		case 4:
 		case 3:
 			Zone att4 = new Zone(new MaplePoint(181,38), new MaplePoint(185,44));
 			moveToPlatform(att4, map);
 			rebuff(.75);
-			return position + 1;
+			return 0;
 		}
 		return 0;
 	}

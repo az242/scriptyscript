@@ -11,11 +11,13 @@ import java.time.LocalTime;
 
 public class Leafre extends BaseBot{
 	MinimapData skele2 = new MinimapData("skele2", new Rectangle(56,72,106,114), new Rectangle(47,45,65,15),"minimapNames/skele2Name.png");
+	MinimapData skynest2 = new MinimapData("skynest2", new Rectangle(6,72,124,90), new Rectangle(48,46,65,15),"minimapNames/skynest2.png");
 	MinimapData cityMap = new MinimapData("leafre", new Rectangle(6,72,210,102), new Rectangle(48,46,70,15), "minimapNames/leafre.png");
 	long dropTimer = 0;
 	public Leafre(Robot robot, Screen[] screens) {
 		super(robot, screens);
 		minimapDatas.add(skele2);
+		minimapDatas.add(skynest2);
 		minimapDatas.add(cityMap);
 		adjustMinimapData(mapleScreen);
 	}
@@ -33,6 +35,7 @@ public class Leafre extends BaseBot{
 		long currTime = System.currentTimeMillis();
 		long startTime = System.currentTimeMillis();
 //		rebuff(.75);
+		checkEquipment();
 		int minutes = 0;
 		while(startTime + (hours * 60 * 60 * 1000) > currTime) {
 			checkPots();
@@ -62,8 +65,35 @@ public class Leafre extends BaseBot{
 		switch(map.name) {
 		case "skele2":
 			return skele2MovementFast(position, map);
+		case "skynest2":
+			return skynest2(position, map);
 		}
 		return 0;
+	}
+	public int skynest2(int position, MinimapData map) throws IOException {
+		Zone loc0 = new Zone(32,32,36,38); //middle platform
+		Zone loc1 = new Zone(62,32,65,38); //left middle platform
+		
+		Zone ropeleft = new Zone(31,51,32,38);
+		Zone ropeleftcheck = new Zone(29,31,33,35);
+		MaplePoint pos = getMinimapPosition(map);
+		switch(position) {
+			case 0:
+				if(pos.y > 38) {
+					climbRope(ropeleft, ropeleftcheck, map);
+				}
+				checkEquipment();
+				telecastAttackMoveSafe(attacks.get("genesis"),loc0, map);
+				break;
+			case 1:
+				if(pos.y > 38) {
+					climbRope(ropeleft, ropeleftcheck, map);
+				}
+				rebuff(.8);
+				telecastAttackMoveSafe(attacks.get("genesis"),loc1, map);
+				return 0;
+		}
+		return position + 1;
 	}
 	//FOR EQUIPS SELLING YOU MUST BE 2nd TO JOIN PARTY
 	public int skele2MovementFast(int position, MinimapData map) throws IOException {
@@ -77,13 +107,13 @@ public class Leafre extends BaseBot{
 		Zone loc1 = new Zone(29,65,32,71); //left middle platform
 		
 		Zone preJump = new Zone(2,69,13,75); //pre-jump location
-		Zone postRope = new Zone(8,44,15,48); //post rope teleport location
+		Zone postRope = new Zone(2,44,15,48); //post rope teleport location
 		
-		Zone loc2 = new Zone(41,45,52,51);
+		Zone loc2 = new Zone(40,45,50,51); //middle top plat 
 		
-		Zone jumpDown = new Zone(71,45,72,50);
+		Zone jumpDown = new Zone(70,45,71,50);
 		//telecast to loc0
-		Zone postJump = new Zone(71,65,72,73);
+		Zone postJump = new Zone(70,65,71,73);
 		Zone postJumpAttack = new Zone(66,65,67,73);
 		
 		switch(position) {
@@ -105,7 +135,7 @@ public class Leafre extends BaseBot{
 				while(!postRope.isInYZone(pos) || !postRope.isInXZone(pos)) {
 					moveToZoneX(postRope, map);
 					pos = getMinimapPosition(map);
-					if(pos.y > leftRope.getTopBound()) {
+					if(pos.y > leftRope.getTopBound()+5) {
 						climbRope(leftRope, checkZoneleft, map);
 					} else if (pos.y > postRope.getBottomBound()) {
 						teleportUp();
@@ -124,17 +154,17 @@ public class Leafre extends BaseBot{
 				break;
 			case 4:
 				telecastAttackMove(attacks.get("genesis"),jumpDown, map);
-				MaplePoint pos = getMinimapPosition(map);
-				while(!postJump.isInYZone(pos) || !postJump.isInXZone(pos)) {
+				MaplePoint pos2 = getMinimapPosition(map);
+				while(!postJump.isInYZone(pos2) || !postJump.isInXZone(pos2)) {
 					moveToZoneX(postJump, map);
-					pos = getMinimapPosition(map);
-					if(pos.y > postJump.getBottomBound()) {
+					pos2 = getMinimapPosition(map);
+					if(pos2.y > postJump.getBottomBound()) {
 						//we dropped too far, get back up
 						climbRope(leftRope, checkZoneleft, map);
-					} else if (pos.y < postJump.getTopBound()){
+					} else if (pos2.y < postJump.getTopBound()){
 						jumpDown();
 					}
-					pos = getMinimapPosition(map);
+					pos2 = getMinimapPosition(map);
 				}
 				checkEquipment();
 				return 0;
@@ -260,7 +290,7 @@ public class Leafre extends BaseBot{
 			robot.delay(600);
 			robot.keyPress(KeyEvent.VK_UP);
 			robot.keyRelease(KeyEvent.VK_UP);
-			robot.delay(2000);
+			robot.delay(3000);
 			tries ++;
 		}
 		if(tries >= 5 && checkMapMatch(cityMap).x < 0) {
@@ -271,16 +301,19 @@ public class Leafre extends BaseBot{
 //		System.out.println(pos.toString());
 		robot.keyPress(KeyEvent.VK_LEFT);
 		robot.keyPress(KeyEvent.VK_ALT);
+		robot.delay(50);
 		robot.keyRelease(KeyEvent.VK_ALT);
 		robot.keyRelease(KeyEvent.VK_LEFT);
 		robot.delay(700);
 		robot.keyPress(KeyEvent.VK_LEFT);
 		robot.keyPress(KeyEvent.VK_ALT);
+		robot.delay(50);
 		robot.keyRelease(KeyEvent.VK_ALT);
 		robot.keyRelease(KeyEvent.VK_LEFT);
 		robot.delay(700);
 		robot.keyPress(KeyEvent.VK_LEFT);
 		robot.keyPress(KeyEvent.VK_ALT);
+		robot.delay(50);
 		robot.keyRelease(KeyEvent.VK_ALT);
 		robot.keyRelease(KeyEvent.VK_LEFT);
 		robot.delay(2000);
