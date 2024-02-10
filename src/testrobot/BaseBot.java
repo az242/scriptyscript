@@ -234,6 +234,7 @@ public abstract class BaseBot {
 	int startingLevel;
 	int startingMesos;
 	long[] buffTimers = new long[buffs.length];
+	int[] buffCounts = new int[buffs.length];
 	String server;
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
@@ -970,6 +971,7 @@ public abstract class BaseBot {
 				}
 				botOutput("Reapplying " + buffs[x].buffName);
 				buffTimers[x] = temptime;
+				buffCounts[x]++;
 //				keyPress(KeyEvent.VK_PAGE_DOWN);
 				keyPress(buffs[x].buffKey);
 				robot.delay(buffs[x].delay);
