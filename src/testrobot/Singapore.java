@@ -70,6 +70,9 @@ public class Singapore extends BaseBot{
 //				botOutput("Sweeper Moved to position index: " + lootPosition);
 //				swapMapleScreen(getScreen(temp));
 //			}
+			if(this.server == "royals") {
+				resetBuffsUlu2(map);
+			}
 			position = movement(position, map);
 //			MaplePoint newCoords = getMinimapPosition(map);
 //			botOutput("Moved to position index: " + newCoords.toString());
@@ -87,7 +90,50 @@ public class Singapore extends BaseBot{
 		}
 		exitScript();
 	}
-	
+	public void resetBuffsUlu2(MinimapData map) throws IOException {
+		Zone rope = new Zone(new MaplePoint(39,44), new MaplePoint(39,62));
+		Zone checkZone = new Zone(new MaplePoint(38,49), new MaplePoint(41,54));
+		for(int x=0;x<buffCounts.length;x++) {
+			if(buffCounts[x] >= 20) {
+				String oldScreen = new String(currScreen);
+				if(!currScreen.equals(buffs[x].screen)) {
+					swapMapleScreen(getScreen(buffs[x].screen));
+				}
+				if(buffs[x].screen == "hermit") {
+					//enable darksight
+					keyPress(KeyEvent.VK_C);
+				}
+				//swap to next channel
+				keyPress(KeyEvent.VK_ESCAPE);
+				robot.delay(1000);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_RIGHT);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				
+				//swap to original channel
+				keyPress(KeyEvent.VK_ESCAPE);
+				robot.delay(1000);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_LEFT);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				
+				climbRope(rope,checkZone, map);
+				
+				if(buffs[x].screen == "hermit") {
+					//disable darksight
+					keyPress(KeyEvent.VK_C);
+				}
+				buffCounts[x] = 0;
+				return;
+			}
+		}
+	}
 	public void attack(MinimapData map) throws IOException {
 		switch(map.name) {
 		case "ulu2":
@@ -137,6 +183,8 @@ public class Singapore extends BaseBot{
 	public int ulu2Sweeper(int position, MinimapData map) throws IOException {
 		Zone rightRope = new Zone(new MaplePoint(93,46), new MaplePoint(93,57));
 		Zone leftRope = new Zone(new MaplePoint(38,46), new MaplePoint(39,57));
+		
+		
 		
 		Zone checkZone = new Zone(new MaplePoint(99,47), new MaplePoint(115,54));
 		
