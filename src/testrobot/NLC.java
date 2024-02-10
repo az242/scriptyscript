@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class NLC extends BaseBot{
 	MinimapData wolfSpider = new MinimapData("Wolf Spiders", new Rectangle(6,72,201,136), new Rectangle(47,45,115,15),"minimapNames/wsName.png");
 	long dropTimer = 0;
-	public NLC(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public NLC(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(wolfSpider);
 		adjustMinimapData(mapleScreen);
 	}

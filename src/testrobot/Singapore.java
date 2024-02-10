@@ -30,8 +30,8 @@ public class Singapore extends BaseBot{
 	MinimapData cityMap = new MinimapData("singapore", new Rectangle(6,72,210,93), new Rectangle(48,46,70,15), "minimapNames/singapore.png");
 	
 	long dropTimer = 0;
-	public Singapore(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public Singapore(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(gs6);
 		minimapDatas.add(gs2Dungeon);
 		minimapDatas.add(gs2);

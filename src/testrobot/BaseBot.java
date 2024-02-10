@@ -222,6 +222,7 @@ public abstract class BaseBot {
 			
 			new BuffData("Hyperbody", 155 , KeyEvent.VK_R, 100, "spearman"),
 			new BuffData("Spearman Pot", 800 , KeyEvent.VK_PAGE_DOWN, 100, "spearman"),
+			
 			new BuffData("Holy Symbol", 120, KeyEvent.VK_U,2100,"bishop","skills/hs.png"),
 			new BuffData("Bless", 200, KeyEvent.VK_Y,700,"bishop","skills/hs.png"),
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
@@ -233,11 +234,13 @@ public abstract class BaseBot {
 	int startingLevel;
 	int startingMesos;
 	long[] buffTimers = new long[buffs.length];
+	String server;
 	BufferedImage[] numImages;
 	BufferedImage[] levelImages;
 	BufferedImage[] mesosNumImages;
 	ArrayList<MinimapData> minimapDatas = new ArrayList<MinimapData>();
-	public BaseBot(Robot robot, Screen[] screens) {
+	public BaseBot(Robot robot, Screen[] screens, String server) {
+		this.server = server;
 		this.attacks.put("genesis", new AttackData(KeyEvent.VK_C, 2375, 2500));
 		this.attacks.put("heal", new AttackData(KeyEvent.VK_V, 590));
 		this.attacks.put("shining", new AttackData(KeyEvent.VK_N, 1050));
@@ -259,7 +262,7 @@ public abstract class BaseBot {
 		buffZone = adjustRectangle(mapleScreen, new Rectangle(990, 24, 30, 30));
 		
 		try {
-			initScreens();
+			initScreens(this.server);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -331,7 +334,89 @@ public abstract class BaseBot {
 			botOutput("Adjusted map data for " + minimapDatas.get(x).name);
 		}
 	}
-	public void initScreens() throws IOException {
+	public void initScreens(String server) throws IOException {
+		switch(server) {
+		case "royals":
+			initScreensMapleRoyals();
+			return;
+		case "legends":
+			initScreensLegends();
+			return;
+		}
+		botOutput("Unrecognized Server type. Exiting...");
+		exitScript();
+		
+	}
+	public void initScreensMapleRoyals() throws IOException {
+		if(this.screens.length == 1){
+			botOutput("Found screen " + 0 + ". Verifying character...");
+			click(100,100);
+			robot.delay(500);
+			Rectangle nameSearch = new Rectangle(85,735, 65, 30);
+			nameSearch = adjustRectangle(this.mapleScreen, nameSearch);
+			boolean found = false;
+			for(int i=0;i<this.screens.length;i++) {
+				if(this.screens[i].index < 0 ) {
+//					botOutput("Checking if this screen is " + this.screens[i].name);
+					MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
+					if(foundName.x > 0) {
+						this.screens[i].index = 0;
+						found = true;
+						botOutput("Verified: " + this.screens[i].name + " on screen " + 0);
+						break;
+					}
+				}
+			}
+			if(!found) {
+				// exit warning theres a unrecognized character
+				BufferedImage bi = robot.createScreenCapture(nameSearch);  // retrieve image
+			    File outputfile = new File("nameTest.png");
+			    ImageIO.write(bi, "png", outputfile);
+				botOutput("Unrecognized character. Exiting...");
+				exitScript();
+			}
+			return;
+		}
+		Rectangle taskSearchArea = new Rectangle(600,1400,500,100);
+		MaplePoint upperLeft = getCurrPosition(taskSearchArea, "mapleTaskIcon.png");
+		if(upperLeft.x < 0) {
+			botOutput("Couldn't find taskbar icon. Exiting...");
+			exitScript();
+		}
+		upperLeft.y = upperLeft.y + taskSearchArea.y;
+		upperLeft.x = upperLeft.x + taskSearchArea.x;
+		//85 735 60 24
+		for(int x=0;x<this.screens.length;x++) {
+			MaplePoint clickPoint = new MaplePoint(upperLeft.x + (50*x), upperLeft.y);
+			click(clickPoint);
+			robot.delay(100);
+			//find icon
+			Rectangle nameSearch = new Rectangle(85,735, 65, 30);
+			nameSearch = adjustRectangle(this.mapleScreen, nameSearch);
+			boolean found = false;
+			for(int i=0;i<this.screens.length;i++) {
+				if(this.screens[i].index < 0 ) {
+//					botOutput("Checking if this screen is " + this.screens[i].name);
+					MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
+					if(foundName.x >= 0) {
+						this.screens[i].index = x;
+						found = true;
+						botOutput("Verified: " + this.screens[i].name + " on screen " + x);
+						break;
+					}
+				}
+			}
+			if(!found) {
+				// exit warning theres a unrecognized character
+				BufferedImage bi = robot.createScreenCapture(nameSearch);  // retrieve image
+			    File outputfile = new File("nameTest.png");
+			    ImageIO.write(bi, "png", outputfile);
+				botOutput("Unrecognized character. Exiting...");
+				exitScript();
+			}
+		}
+	}
+	public void initScreensLegends() throws IOException {
 		if(this.screens.length == 1){
 			botOutput("Found screen " + 0 + ". Verifying character...");
 			click(100,100);
@@ -364,7 +449,7 @@ public abstract class BaseBot {
 		MaplePoint upperLeft = getCurrPosition(new Rectangle(900,1400,500,100), "mapleTaskIcon.png");
 		upperLeft.y = upperLeft.y + 1400;
 		upperLeft.x = upperLeft.x + 900;
-//		outputCoords(upperLeft); 
+		outputCoords(upperLeft); 
 		int width = this.screens.length*165;
 		//85 735 60 24
 		Rectangle clickZone = new Rectangle(upperLeft.x-(width/2),upperLeft.y-165,width,165);
@@ -403,7 +488,7 @@ public abstract class BaseBot {
 					botOutput("Unrecognized character. Exiting...");
 					exitScript();
 				}
-			}else {
+			} else {
 				//couldnt find expect amount of screens, exit.
 				botOutput("Couldn't find expect number of screens. Exiting...");
 				exitScript();
@@ -411,6 +496,16 @@ public abstract class BaseBot {
 		}
 	}
 	public void swapMapleScreen(Screen screen) throws IOException {
+		switch(this.server) {
+		case "legends":
+			swapMapleScreenLegends(screen);
+			return;
+		case "royals":
+			swapMapleScreenRoyals(screen);
+			return;
+		}
+	}
+	public void swapMapleScreenLegends(Screen screen) throws IOException {
 		if(this.screens.length == 1){
 			botOutput("Swapped to screen " + screen.index);
 			click(100,100);
@@ -442,6 +537,28 @@ public abstract class BaseBot {
 			exitScript();
 		}
 	}
+	public void swapMapleScreenRoyals(Screen screen) throws IOException {
+		if(this.screens.length == 1){
+			botOutput("Swapped to screen " + screen.index);
+			click(100,100);
+			this.currScreen = screen.name;
+			robot.delay(200);
+			return;
+		}
+		Rectangle taskSearchArea = new Rectangle(600,1400,500,100);
+		MaplePoint upperLeft = getCurrPosition(taskSearchArea, "mapleTaskIcon.png");
+		if(upperLeft.x < 0) {
+			botOutput("Couldn't find taskbar icon. Exiting...");
+			exitScript();
+		}
+		upperLeft.y = upperLeft.y + taskSearchArea.y;
+		upperLeft.x = upperLeft.x + taskSearchArea.x + (screen.index*50);
+		//85 735 60 24
+		click(upperLeft);
+		//find icon
+		this.currScreen = screen.name;
+		robot.delay(200);
+	}
 	public Rectangle getMapleScreen() throws IOException {
 		MaplePoint upperLeft = getCurrPosition(new Rectangle(0,0,1920,1080), "mapleIcon.png");
 		BufferedImage bi = robot.createScreenCapture(new Rectangle(upperLeft.x-3,upperLeft.y+ 21,1025,768));  // retrieve image
@@ -467,10 +584,12 @@ public abstract class BaseBot {
 		for(int x1=0;x1<image.getWidth()-imageRecog.getWidth();x1++) {
 			for(int y1=0;y1<image.getHeight()-imageRecog.getHeight();y1++) {
 				boolean matches = true;
+				ImageLoop:
 				for(int x2=0;x2<imageRecog.getWidth();x2++) {
 					for(int y2=0;y2<imageRecog.getHeight();y2++) {
 						if(imageRecog.getRGB(x2, y2) != image.getRGB(x1+x2, y1+y2)) {
 							matches = false;
+							break ImageLoop;
 						}
 					}
 				}
@@ -482,8 +601,8 @@ public abstract class BaseBot {
 				}
 			}
 		}
-		File outputfile = new File("couldFind.png");
-	    ImageIO.write(image, "png", outputfile);
+//		File outputfile = new File("couldntFind.png");
+//	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
 	}
 	public MaplePoint findInventory() throws IOException {
@@ -821,29 +940,6 @@ public abstract class BaseBot {
 			}
 		}
 	}
-	public void pickUp(String screen, int amount) throws IOException {
-		String temp = new String(currScreen);
-		botOutput("Picking up loot on screen " + screen + " " + amount + " times.");
-		if(screen != currScreen) {
-			swapMapleScreen(getScreen(screen));
-			robot.delay(100);
-			for(int x=0;x<amount;x++) {
-				robot.keyPress(KeyEvent.VK_Z);
-				robot.delay(randomNum(75,200));
-			}
-			robot.keyRelease(KeyEvent.VK_Z);
-			robot.delay(100);
-			swapMapleScreen(getScreen(temp));
-			robot.delay(100);
-		} else {
-			for(int x=0;x<amount;x++) {
-				robot.keyPress(KeyEvent.VK_Z);
-				robot.delay(randomNum(75,200));
-			}
-			robot.keyRelease(KeyEvent.VK_Z);
-			robot.delay(100);
-		}
-	}
 	public void feedPets() throws IOException {
 		long currTime = System.currentTimeMillis();
 		String oldScreen = new String(currScreen);
@@ -920,8 +1016,8 @@ public abstract class BaseBot {
 				}
 			}
 		}
-		File outputfile = new File("couldFindBuff.png");
-	    ImageIO.write(image, "png", outputfile);
+//		File outputfile = new File("couldFindBuff.png");
+//	    ImageIO.write(image, "png", outputfile);
 		return new MaplePoint(-1,-1);
 	}
 	public void attack(int numAttacks, int key, int delay) throws IOException {

@@ -10,8 +10,8 @@ public class Malaysia extends BaseBot{
 	MinimapData mb2 = new MinimapData("mb2", new Rectangle(8,72,127,71), new Rectangle(48,46,115,15),"minimapNames/mb1Name.png");
 	MinimapData ftp1 = new MinimapData("ftp1", new Rectangle(19,72,145,111), new Rectangle(48,46,115,15),"minimapNames/ftp1Name.png");
 	long dropTimer = 0;
-	public Malaysia(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public Malaysia(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(mb1);
 		minimapDatas.add(mb2);
 		minimapDatas.add(ftp1);

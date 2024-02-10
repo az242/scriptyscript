@@ -12,8 +12,8 @@ public class Victoria extends BaseBot{
 	MinimapData jrwraith = new MinimapData("jrwraith", new Rectangle(6,72,259,79), new Rectangle(47,45,85,15),"minimapNames/jrwraithName.png");
 	MinimapData wraith = new MinimapData("wraith", new Rectangle(6,72,259,79), new Rectangle(47,45,85,15),"minimapNames/wraithName.png");
 	long dropTimer = 0;
-	public Victoria(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public Victoria(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(ironboar);
 		minimapDatas.add(bubbling);
 		minimapDatas.add(jrwraith);

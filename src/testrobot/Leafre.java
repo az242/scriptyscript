@@ -14,8 +14,8 @@ public class Leafre extends BaseBot{
 	MinimapData skynest2 = new MinimapData("skynest2", new Rectangle(6,72,124,90), new Rectangle(48,46,65,15),"minimapNames/skynest2.png");
 	MinimapData cityMap = new MinimapData("leafre", new Rectangle(6,72,210,102), new Rectangle(48,46,70,15), "minimapNames/leafre.png");
 	long dropTimer = 0;
-	public Leafre(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public Leafre(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(skele2);
 		minimapDatas.add(skynest2);
 		minimapDatas.add(cityMap);

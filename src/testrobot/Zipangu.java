@@ -12,8 +12,8 @@ public class Zipangu extends BaseBot{
 	MinimapData ninto = new MinimapData("ninto", new Rectangle(6,72,167,52), new Rectangle(47,45,40,15),"minimapNames/ninjacastleName.png");
 	MinimapData redslime = new MinimapData("Red Slime", new Rectangle(6,72,158,56), new Rectangle(8,46,50,15),"minimapNames/redSlimeName.png");
 	long dropTimer = 0;
-	public Zipangu(Robot robot, Screen[] screens) {
-		super(robot, screens);
+	public Zipangu(Robot robot, Screen[] screens, String server) {
+		super(robot, screens,server);
 		minimapDatas.add(ninto);
 		minimapDatas.add(redslime);
 		adjustMinimapData(mapleScreen);
