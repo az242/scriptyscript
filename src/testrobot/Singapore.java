@@ -92,36 +92,39 @@ public class Singapore extends BaseBot{
 	}
 	public void resetBuffsUlu2(MinimapData map) throws IOException {
 		Zone rope = new Zone(new MaplePoint(39,44), new MaplePoint(39,62));
-		Zone checkZone = new Zone(new MaplePoint(38,49), new MaplePoint(41,54));
+		Zone checkZone = new Zone(new MaplePoint(38,50), new MaplePoint(41,54));
 		for(int x=0;x<buffCounts.length;x++) {
 			if(buffCounts[x] >= 20) {
 				String oldScreen = new String(currScreen);
 				if(!currScreen.equals(buffs[x].screen)) {
 					swapMapleScreen(getScreen(buffs[x].screen));
+				} else {
+					buffCounts[x] = 0;
+					return;
 				}
 				if(buffs[x].screen == "hermit") {
 					//enable darksight
-					keyPress(KeyEvent.VK_C);
+					keyPress(KeyEvent.VK_V);
 				}
 				//swap to next channel
 				keyPress(KeyEvent.VK_ESCAPE);
-				robot.delay(1000);
+				robot.delay(500);
 				keyPress(KeyEvent.VK_ENTER);
 				robot.delay(500);
 				keyPress(KeyEvent.VK_RIGHT);
 				robot.delay(500);
 				keyPress(KeyEvent.VK_ENTER);
-				robot.delay(500);
+				robot.delay(4000);
 				
 				//swap to original channel
 				keyPress(KeyEvent.VK_ESCAPE);
-				robot.delay(1000);
+				robot.delay(500);
 				keyPress(KeyEvent.VK_ENTER);
 				robot.delay(500);
 				keyPress(KeyEvent.VK_LEFT);
 				robot.delay(500);
 				keyPress(KeyEvent.VK_ENTER);
-				robot.delay(500);
+				robot.delay(4000);
 				
 				climbRope(rope,checkZone, map);
 				
@@ -129,7 +132,10 @@ public class Singapore extends BaseBot{
 					//disable darksight
 					keyPress(KeyEvent.VK_C);
 				}
-				buffCounts[x] = 0;
+				buffCounts = new int[buffs.length];
+				if(!oldScreen.equals(currScreen)) {
+					swapMapleScreen(getScreen(oldScreen));
+				}
 				return;
 			}
 		}
@@ -285,7 +291,7 @@ public class Singapore extends BaseBot{
 			robot.delay(600);
 			robot.keyPress(KeyEvent.VK_UP);
 			robot.keyRelease(KeyEvent.VK_UP);
-			robot.delay(2000);
+			robot.delay(3500);
 			tries ++;
 		}
 		if(tries >= 5 && checkMapMatch(cityMap).x < 0) {

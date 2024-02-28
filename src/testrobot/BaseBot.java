@@ -215,7 +215,7 @@ public abstract class BaseBot {
 	Screen[] screens;
 	String currScreen = "";
 	BuffData[] buffs = {
-			new BuffData("Haste", 200, KeyEvent.VK_R,100, "hermit"),
+			new BuffData("Haste", 200, KeyEvent.VK_R,1000, "hermit"),
 			new BuffData("Mesos Up", 120, KeyEvent.VK_T,1000, "hermit"),
 			new BuffData("Hermit Pot", 2000, KeyEvent.VK_PAGE_DOWN,100, "hermit"),
 			new BuffData("Hermit", 120, KeyEvent.VK_U,100, "hermit"),
@@ -228,7 +228,7 @@ public abstract class BaseBot {
 			new BuffData("Invincible", 300, KeyEvent.VK_T,700,"bishop","skills/invincible.png"),
 			new BuffData("Magic Gaurd", 600, KeyEvent.VK_R,700,"bishop","skills/mg.png"),
 			new BuffData("Maple Warrior", 600, KeyEvent.VK_D,1600,"bishop","skills/mw.png"),
-			new BuffData("Magic", 1800, KeyEvent.VK_DELETE,500,"bishop")
+			new BuffData("Magic", 1900, KeyEvent.VK_DELETE,500,"bishop")
 	};
 	HashMap<String, AttackData> attacks = new HashMap<String, AttackData>();
 	int startingLevel;
@@ -358,7 +358,7 @@ public abstract class BaseBot {
 			boolean found = false;
 			for(int i=0;i<this.screens.length;i++) {
 				if(this.screens[i].index < 0 ) {
-//					botOutput("Checking if this screen is " + this.screens[i].name);
+					botOutput("Checking if this screen is " + this.screens[i].name);
 					MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
 					if(foundName.x > 0) {
 						this.screens[i].index = 0;
@@ -378,7 +378,7 @@ public abstract class BaseBot {
 			}
 			return;
 		}
-		Rectangle taskSearchArea = new Rectangle(600,1400,500,100);
+		Rectangle taskSearchArea = new Rectangle(600,1000,500,100);
 		MaplePoint upperLeft = getCurrPosition(taskSearchArea, "mapleTaskIcon.png");
 		if(upperLeft.x < 0) {
 			botOutput("Couldn't find taskbar icon. Exiting...");
@@ -397,7 +397,7 @@ public abstract class BaseBot {
 			boolean found = false;
 			for(int i=0;i<this.screens.length;i++) {
 				if(this.screens[i].index < 0 ) {
-//					botOutput("Checking if this screen is " + this.screens[i].name);
+					botOutput("Checking if this screen is " + this.screens[i].name + ", " + i);
 					MaplePoint foundName = getCurrPosition(nameSearch, this.screens[i].file);
 					if(foundName.x >= 0) {
 						this.screens[i].index = x;
@@ -546,7 +546,7 @@ public abstract class BaseBot {
 			robot.delay(200);
 			return;
 		}
-		Rectangle taskSearchArea = new Rectangle(600,1400,500,100);
+		Rectangle taskSearchArea = new Rectangle(600,1000,500,100);
 		MaplePoint upperLeft = getCurrPosition(taskSearchArea, "mapleTaskIcon.png");
 		if(upperLeft.x < 0) {
 			botOutput("Couldn't find taskbar icon. Exiting...");
@@ -969,9 +969,10 @@ public abstract class BaseBot {
 				if(!currScreen.equals(buffs[x].screen)) {
 					swapMapleScreen(getScreen(buffs[x].screen));
 				}
-				botOutput("Reapplying " + buffs[x].buffName);
+				
 				buffTimers[x] = temptime;
 				buffCounts[x]++;
+				botOutput("Reapplying " + buffs[x].buffName + ", Count:" + buffCounts[x]);
 //				keyPress(KeyEvent.VK_PAGE_DOWN);
 				keyPress(buffs[x].buffKey);
 				robot.delay(buffs[x].delay);

@@ -48,6 +48,9 @@ public class Leafre extends BaseBot{
 //				botOutput("Sweeper Moved to position index: " + lootPosition);
 //				swapMapleScreen(getScreen(temp));
 //			}
+			if(this.server == "royals" && map.name.equals("skele2")) {
+				resetBuffs(map);
+			}
 			position = movement(position, map);
 //			botOutput("Moved to position index: " + position);
 			robot.delay(200);
@@ -60,6 +63,43 @@ public class Leafre extends BaseBot{
 			}
 		}
 		exitScript();
+	}
+	public void resetBuffs(MinimapData map) throws IOException {
+		for(int x=0;x<buffCounts.length;x++) {
+			if(buffCounts[x] >= 20) {
+				String oldScreen = new String(currScreen);
+				if(!currScreen.equals(buffs[x].screen)) {
+					swapMapleScreen(getScreen(buffs[x].screen));
+				} else {
+					buffCounts[x] = 0;
+					return;
+				}
+				//swap to next channel
+				keyPress(KeyEvent.VK_ESCAPE);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_RIGHT);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(4000);
+				
+				//swap to original channel
+				keyPress(KeyEvent.VK_ESCAPE);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_LEFT);
+				robot.delay(500);
+				keyPress(KeyEvent.VK_ENTER);
+				robot.delay(4000);
+				buffCounts = new int[buffs.length];
+				if(!oldScreen.equals(currScreen)) {
+					swapMapleScreen(getScreen(oldScreen));
+				}
+				return;
+			}
+		}
 	}
 	public int movement(int position, MinimapData map) throws IOException {
 		switch(map.name) {
@@ -167,6 +207,7 @@ public class Leafre extends BaseBot{
 					pos2 = getMinimapPosition(map);
 				}
 				checkEquipment();
+//				rebuff(.9);
 				return 0;
 		}
 		return position + 1;
